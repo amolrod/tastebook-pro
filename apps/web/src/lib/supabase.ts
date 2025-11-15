@@ -2,14 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database';
 
 // Verificar que las variables de entorno existen
-// En Vite, las variables de entorno se acceden con import.meta.env
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+// En Vite, las variables de entorno DEBEN tener el prefijo VITE_
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
     'Faltan variables de entorno de Supabase. ' +
-    'Por favor configura SUPABASE_URL y SUPABASE_ANON_KEY en tu archivo .env'
+    'Por favor configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu archivo .env.local'
   );
 }
 
