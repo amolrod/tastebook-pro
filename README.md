@@ -2,6 +2,16 @@
 
 Plataforma web de gestión de recetas con planificación inteligente de comidas, lista de compra automática y modo cocina fullscreen. Proyecto full-stack con Next.js, Supabase y React Query.
 
+##  Menu Principal
+![Inicio](img/inicio.png)
+
+## Planificador semanal
+![Planificador](img/planificador.png)
+
+# Lista de la compra
+![Compra](img/compra.png)
+
+
 ## 🚀 Features
 
 ### ✅ Implementadas
