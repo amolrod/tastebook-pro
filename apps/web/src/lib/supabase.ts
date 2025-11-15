@@ -1,15 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database';
 
-// Verificar que las variables de entorno existen
-// En Vite, las variables de entorno DEBEN tener el prefijo VITE_
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Obtener variables de entorno de forma segura
+const getEnvVar = (key: string): string => {
+  // En el cliente, usar import.meta.env
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env[key] as string || '';
+  }
+  // En SSR/Node, usar process.env
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || '';
+  }
+  return '';
+};
+
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Faltan variables de entorno de Supabase. ' +
-    'Por favor configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en tu archivo .env.local'
+  console.warn(
+    '⚠️  Variables de entorno de Supabase no configuradas. ' +
+    'Configura VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY en .env.local'
   );
 }
 
@@ -42,11 +53,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
  *   .upload('image.jpg', file);
  * ```
  */
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    // Persistir sesión en localStorage
-    persistSession: true,
-    // Auto-refresh de tokens
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      // Persistir sesión en localStorage
+      persistSession: true,
+      // Auto-refresh de tokens
     autoRefreshToken: true,
     // Detectar cambios de sesión
     detectSessionInUrl: true,

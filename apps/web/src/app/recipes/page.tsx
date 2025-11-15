@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRecipes } from '../../hooks/useRecipes';
 import { RecipeCard } from '../../components/recipes/RecipeCard';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
@@ -21,6 +21,17 @@ export default function RecipesPage() {
     'created_at',
     'desc'
   );
+
+  // Debug: Log para ver el estado
+  useEffect(() => {
+    console.log('🔍 Estado de recetas:', {
+      isLoading,
+      hasError: !!error,
+      errorMessage: error?.message,
+      recipesCount: recipes?.length || 0,
+      recipes: recipes?.slice(0, 2) // Solo primeras 2 para no saturar consola
+    });
+  }, [isLoading, error, recipes]);
 
   return (
     <div className="flex h-screen bg-[#F3F3F3] dark:bg-[#0A0A0A]">
@@ -118,18 +129,29 @@ export default function RecipesPage() {
               <div className="w-20 h-20 mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                 <span className="text-4xl">🍳</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">No hay recetas</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+              <h3 className="text-xl font-semibold mb-2">No hay recetas en la base de datos</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-2 max-w-md">
                 {searchQuery
                   ? `No encontramos recetas que coincidan con "${searchQuery}"`
-                  : 'Comienza agregando tu primera receta deliciosa'}
+                  : 'La conexión a Supabase funciona correctamente, pero no hay recetas todavía.'}
               </p>
-              <button
-                onClick={() => (window.location.href = '/recipes/new')}
-                className="px-6 py-3 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg transition-colors"
-              >
-                Crear Primera Receta
-              </button>
+              <p className="text-sm text-gray-500 dark:text-gray-500 mb-6 max-w-md">
+                Para agregar recetas de prueba, ejecuta el SQL de <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">seed_recipes.sql</code> en Supabase Dashboard → SQL Editor
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => refetch()}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                >
+                  🔄 Refrescar
+                </button>
+                <button
+                  onClick={() => (window.location.href = '/recipes/new')}
+                  className="px-6 py-3 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg transition-colors"
+                >
+                  ➕ Crear Primera Receta
+                </button>
+              </div>
             </div>
           )}
 
