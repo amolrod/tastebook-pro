@@ -1,12 +1,12 @@
 import { Clock, Users, Star } from 'lucide-react';
-import type { Recipe } from '@/lib/api/recipes';
+import type { Recipe } from '../../lib/api/recipes';
 
 interface RecipeCardProps {
   recipe: Recipe;
   onClick?: () => void;
 }
 
-const difficultyConfig = {
+const difficultyConfig: Record<string, { bg: string; text: string; label: string }> = {
   facil: { bg: '#dcfce7', text: '#16a34a', label: 'Fácil' },
   media: { bg: '#fef3c7', text: '#d97706', label: 'Media' },
   dificil: { bg: '#fee2e2', text: '#dc2626', label: 'Difícil' },

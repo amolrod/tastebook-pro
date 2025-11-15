@@ -53,7 +53,7 @@ Plataforma web de gestión de recetas con planificación inteligente de comidas,
 - `react-hook-form` ^7.66 - Formularios
 - `motion` ^12.23 - Animaciones
 
-## 📋 Setup Instructions
+## 📋 Quick Start
 
 ### 1. Clonar el repositorio
 ```bash
@@ -66,36 +66,37 @@ cd tastebook-pro
 pnpm install
 ```
 
-### 3. Configurar variables de entorno
-Crear archivo `.env` en la raíz del proyecto:
+### 3. Configurar Supabase (Opción A: Script Automático)
+```bash
+# Ejecutar script interactivo
+./scripts/setup.sh
+
+# O manualmente:
+cd apps/web
+cp .env.example .env.local
+# Editar .env.local con tus credenciales
+```
+
+### 4. Configurar Supabase (Opción B: Manual)
+1. Crea un proyecto en [supabase.com](https://supabase.com)
+2. Obtén tus credenciales en Settings → API
+3. Crea `apps/web/.env.local`:
 ```env
-# Supabase
-SUPABASE_URL=tu_supabase_url
-SUPABASE_ANON_KEY=tu_supabase_anon_key
-
-# Opcional: para features avanzadas
-STRIPE_SECRET_KEY=tu_stripe_key
+VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-anon-key-aqui
 ```
+4. Ejecuta el SQL de `/docs/DATABASE.md` en SQL Editor
+5. Crea bucket `recipe-images` en Storage (público)
 
-### 4. Ejecutar migraciones de base de datos
-```bash
-# Ejecutar en Supabase Dashboard SQL Editor
-# Ver archivos en /docs/DATABASE.md
-```
+**📚 Guía detallada:** [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md)
 
-### 5. Crear bucket de Storage en Supabase
-```bash
-# Bucket: recipe-images
-# Políticas: public read, authenticated write
-```
-
-### 6. Iniciar servidor de desarrollo
+### 5. Iniciar servidor de desarrollo
 ```bash
 cd apps/web
 pnpm dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173`
+La aplicación estará disponible en `http://localhost:4000` 🚀
 
 ## 📜 Scripts Disponibles
 
