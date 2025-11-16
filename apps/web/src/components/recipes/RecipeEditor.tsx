@@ -56,12 +56,12 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
   // useFieldArray para manejar arrays dinámicos
   const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({
     control,
-    name: 'ingredients',
+    name: 'ingredients' as any,
   });
 
   const { fields: stepFields, append: appendStep, remove: removeStep } = useFieldArray({
     control,
-    name: 'instructions',
+    name: 'instructions' as any,
   });
 
   const toggleTag = (tag: string) => {
@@ -73,10 +73,15 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
   };
 
   const onSubmit = (data: CreateRecipeInput) => {
+    console.log('🔍 Datos del formulario:', data);
+    console.log('🏷️ Tags seleccionados:', selectedTags);
+    
     const recipeData: CreateRecipeInput = {
       ...data,
       tags: selectedTags,
     };
+
+    console.log('📦 Datos finales a enviar:', recipeData);
 
     createRecipe(recipeData, {
       onSuccess: (recipe) => {
