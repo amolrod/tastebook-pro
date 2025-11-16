@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateRecipeSchema, type CreateRecipeInput } from '../../lib/validations/recipe';
 import { useCreateRecipe } from '../../hooks/useRecipes';
@@ -34,25 +34,34 @@ const COMMON_TAGS = [
  * - Integración con React Query
  */
 export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorProps) {
-  const [ingredients, setIngredients] = useState<Ingredient[]>(
-    initialData?.ingredients || [{ name: '', quantity: 1, unit: '' }]
-  );
-  const [steps, setSteps] = useState<string[]>(initialData?.steps || ['']);
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
 
   const { mutate: createRecipe, isPending } = useCreateRecipe();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateRecipeInput>({
+  const { register, handleSubmit, control, formState: { errors } } = useForm<CreateRecipeInput>({
     resolver: zodResolver(CreateRecipeSchema),
     defaultValues: {
       title: initialData?.title || '',
       description: initialData?.description || '',
+      ingredients: initialData?.ingredients || [{ name: '', quantity: 1, unit: '' }],
+      instructions: initialData?.instructions || [''],
       servings: initialData?.servings || 4,
       difficulty: initialData?.difficulty || 'media',
       prep_time: initialData?.prep_time || undefined,
       cook_time: initialData?.cook_time || undefined,
       is_public: initialData?.is_public || false,
     }
+  });
+
+  // useFieldArray para manejar arrays dinámicos
+  const { fields: ingredientFields, append: appendIngredient, remove: removeIngredient } = useFieldArray({
+    control,
+    name: 'ingredients',
+  });
+
+  const { fields: stepFields, append: appendStep, remove: removeStep } = useFieldArray({
+    control,
+    name: 'instructions',
   });
 
   const toggleTag = (tag: string) => {
@@ -63,11 +72,9 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
     );
   };
 
-  const onSubmit = (data: Omit<CreateRecipeInput, 'ingredients' | 'steps' | 'tags'>) => {
+  const onSubmit = (data: CreateRecipeInput) => {
     const recipeData: CreateRecipeInput = {
       ...data,
-      ingredients,
-      steps,
       tags: selectedTags,
     };
 
@@ -117,18 +124,100 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
       </div>
 
       {/* Ingredientes */}
-      <IngredientList
-        ingredients={ingredients}
-        onChange={setIngredients}
-        errors={errors.ingredients?.message}
-      />
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-black dark:text-white font-inter">
+          Ingredientes *
+        </label>
+        <div className="space-y-3">
+          {ingredientFields.map((field, index) => (
+            <div key={field.id} className="flex gap-2 items-start">
+              <input
+                {...register(`ingredients.${index}.name` as const)}
+                placeholder="Nombre"
+                className="flex-1 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#1E1E1E] text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              />
+              <input
+                {...register(`ingredients.${index}.quantity` as const, { valueAsNumber: true })}
+                type="number"
+                step="0.1"
+                placeholder="Cantidad"
+                className="w-24 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#1E1E1E] text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              />
+              <input
+                {...register(`ingredients.${index}.unit` as const)}
+                placeholder="Unidad"
+                className="w-24 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#1E1E1E] text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              />
+              {ingredientFields.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeIngredient(index)}
+                  className="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => appendIngredient({ name: '', quantity: 1, unit: '' })}
+          className="mt-3 px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-lg hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-all text-black dark:text-white font-inter font-semibold"
+        >
+          + Añadir Ingrediente
+        </button>
+        {errors.ingredients && (
+          <p className="text-red-500 text-sm mt-2 font-inter">
+            {typeof errors.ingredients === 'string' ? errors.ingredients : errors.ingredients.message}
+          </p>
+        )}
+      </div>
 
       {/* Pasos */}
-      <StepList
-        steps={steps}
-        onChange={setSteps}
-        errors={errors.steps?.message}
-      />
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-black dark:text-white font-inter">
+          Pasos de Preparación *
+        </label>
+        <div className="space-y-3">
+          {stepFields.map((field, index) => (
+            <div key={field.id} className="flex gap-3 items-start">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[#10b981] to-[#059669] text-white flex items-center justify-center font-bold text-sm">
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <textarea
+                  {...register(`instructions.${index}` as const)}
+                  rows={2}
+                  placeholder={`Paso ${index + 1}`}
+                  className="w-full px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#1E1E1E] text-black dark:text-white font-inter resize-none focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                />
+              </div>
+              {stepFields.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeStep(index)}
+                  className="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => appendStep('')}
+          className="mt-3 px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-lg hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-all text-black dark:text-white font-inter font-semibold"
+        >
+          + Añadir Paso
+        </button>
+        {errors.instructions && (
+          <p className="text-red-500 text-sm mt-2 font-inter">
+            {typeof errors.instructions === 'string' ? errors.instructions : errors.instructions.message}
+          </p>
+        )}
+      </div>
 
       {/* Metadata Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

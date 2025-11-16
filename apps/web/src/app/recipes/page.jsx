@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { useRecipes } from '../../hooks/useRecipes';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
-import { Filter, Grid3x3, List, Search, Clock, Users, Star } from 'lucide-react';
+import { Filter, Grid3x3, List, Search, Clock, Users, Star, Plus } from 'lucide-react';
 
 export default function RecipesPage() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [filterOpen, setFilterOpen] = useState(false);
@@ -54,7 +56,7 @@ export default function RecipesPage() {
         <Header
           onMenuClick={() => setSidebarOpen(true)}
           title="Mis Recetas"
-          onCreateClick={() => (window.location.href = '/recipes/new')}
+          onCreateClick={() => navigate('/recipes/new')}
         />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -157,7 +159,7 @@ export default function RecipesPage() {
                   🔄 Refrescar
                 </button>
                 <button
-                  onClick={() => (window.location.href = '/recipes/new')}
+                  onClick={() => navigate('/recipes/new')}
                   className="px-6 py-3 bg-[#10b981] hover:bg-[#059669] text-white rounded-lg transition-all font-inter font-semibold shadow-lg"
                 >
                   ➕ Crear Primera Receta
@@ -277,6 +279,15 @@ export default function RecipesPage() {
           )}
         </div>
       </div>
+
+      {/* Floating Action Button para crear recetas */}
+      <button
+        onClick={() => navigate('/recipes/new')}
+        className="fixed bottom-6 right-6 z-30 w-14 h-14 md:w-16 md:h-16 bg-gradient-to-r from-[#10b981] to-[#059669] rounded-full shadow-2xl hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all duration-300 flex items-center justify-center group hover:scale-110"
+        aria-label="Crear nueva receta"
+      >
+        <Plus className="w-7 h-7 md:w-8 md:h-8 text-white group-hover:rotate-90 transition-transform duration-300" />
+      </button>
     </div>
   );
 }

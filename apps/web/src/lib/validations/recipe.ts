@@ -32,7 +32,7 @@ export const CreateRecipeSchema = z.object({
     .optional(),
   ingredients: z.array(IngredientSchema)
     .min(1, 'Al menos 1 ingrediente requerido'),
-  steps: z.array(z.string().min(1, 'Paso no puede estar vacío'))
+  instructions: z.array(z.string().min(1, 'Paso no puede estar vacío'))
     .min(1, 'Al menos 1 paso requerido'),
   prep_time: z.number().int().positive().optional(),
   cook_time: z.number().int().positive().optional(),

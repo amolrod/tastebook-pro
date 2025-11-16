@@ -61,7 +61,7 @@ export interface Database {
           title: string;
           description: string | null;
           ingredients: Json;
-          steps: Json;
+          instructions: Json;
           prep_time: number | null;
           cook_time: number | null;
           servings: number;
@@ -83,7 +83,7 @@ export interface Database {
           title: string;
           description?: string | null;
           ingredients: Json;
-          steps: Json;
+          instructions: Json;
           prep_time?: number | null;
           cook_time?: number | null;
           servings?: number;
@@ -105,7 +105,7 @@ export interface Database {
           title?: string;
           description?: string | null;
           ingredients?: Json;
-          steps?: Json;
+          instructions?: Json;
           prep_time?: number | null;
           cook_time?: number | null;
           servings?: number;
@@ -430,9 +430,9 @@ export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
 /**
  * Receta completa (Row con tipos parseados)
  */
-export type Recipe = Omit<Database['public']['Tables']['recipes']['Row'], 'ingredients' | 'steps' | 'nutrition'> & {
+export type Recipe = Omit<Database['public']['Tables']['recipes']['Row'], 'ingredients' | 'instructions' | 'nutrition'> & {
   ingredients: Ingredient[];
-  steps: string[];
+  instructions: string[];
   nutrition: Nutrition;
 };
 
