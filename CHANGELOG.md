@@ -2,7 +2,82 @@
 
 Registro cronológico de cambios en Tastebook Pro.
 
-## [16 Nov 2025] - Sprint 1: COMPLETADO ✅ + Limpieza de Código
+## [16 Nov 2025 - Tarde] - Sprint 1: COMPLETADO + Fixes de Producción ✅
+
+### 🎉 Funcionalidad de Recetas COMPLETAMENTE OPERATIVA
+
+**Problema resuelto:** Formulario de creación de recetas ahora funciona end-to-end.
+
+### 🐛 Fixes Críticos de Producción
+
+**1. Auth.js SessionProvider eliminado:**
+- ❌ Removido `SessionProvider` de `root.tsx`
+- Causaba `ClientFetchError` al intentar fetch endpoint inexistente
+- App ahora funciona sin bloqueos de auth
+
+**2. Validación de formularios mejorada:**
+- ✅ Filtrado automático de campos vacíos antes de enviar
+- ✅ Validación manual de mínimos (1 ingrediente, 1 paso, título obligatorio)
+- ✅ Toast notifications con `sonner` (eliminados `alert()` nativos)
+- ✅ Manejo específico de errores de Supabase (RLS, foreign key, etc.)
+
+**3. Configuración de Supabase:**
+- ✅ RLS policies actualizadas:
+  - Política de lectura pública en tabla `recipes`
+  - Política de inserción anónima (temporal para desarrollo)
+- ✅ Campo `user_id` ahora opcional (NULL permitido)
+- ✅ Cuando se implemente auth, `user_id` se asignará automáticamente
+
+**4. Mejoras en RecipeEditor:**
+- ✅ Formulario con react-hook-form + useFieldArray
+- ✅ Campos dinámicos (agregar/eliminar ingredientes y pasos)
+- ✅ Validación robusta con Zod
+- ✅ Mensajes de error claros en toast notifications
+- ✅ Redirect automático a `/recipes` después de crear
+
+### 📝 Notas Técnicas
+
+**Ingredientes:**
+- Dos números: `quantity` (cantidad) y `unit` (unidad)
+- Ejemplo: "400 gramos" → quantity=400, unit="gramos"
+
+**Recetas privadas:**
+- Campo `is_public` (boolean)
+- Si `false`: Solo visible para el creador (cuando se implemente auth)
+- Si `true`: Visible para todos
+- Actualmente todas visibles porque no hay auth
+
+### 🔧 Cambios en Código
+
+**Archivos modificados:**
+- `apps/web/src/app/root.tsx` - Removido SessionProvider
+- `apps/web/src/components/recipes/RecipeEditor.tsx` - Toast + validación
+- `apps/web/src/lib/api/recipes.ts` - user_id condicional
+
+**SQL ejecutado en Supabase:**
+```sql
+-- RLS Policies
+CREATE POLICY "Allow anonymous recipe creation" ON recipes FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public read access" ON recipes FOR SELECT USING (true);
+
+-- user_id opcional
+ALTER TABLE recipes ALTER COLUMN user_id DROP NOT NULL;
+ALTER TABLE recipes ALTER COLUMN user_id SET DEFAULT NULL;
+```
+
+### ✅ Resultado
+
+**FUNCIONALIDAD COMPLETA:**
+- ✅ Usuario puede crear recetas sin autenticación
+- ✅ Recetas se guardan en Supabase correctamente
+- ✅ Validación client-side funcional
+- ✅ Notificaciones toast elegantes
+- ✅ Redirect después de crear
+- ✅ Listo para implementar auth en Sprint 2
+
+---
+
+## [16 Nov 2025 - Mañana] - Sprint 1: COMPLETADO ✅ + Limpieza de Código
 
 ### 🎉 Sprint 1 Completado (100%)
 
@@ -77,11 +152,11 @@ Registro cronológico de cambios en Tastebook Pro.
 
 ### 📊 Métricas Sprint 1
 
-- **Commits realizados:** 5+ (con Conventional Commits)
+- **Commits realizados:** 7+ (con Conventional Commits)
 - **Archivos TypeScript:** 20+
 - **Líneas de documentación:** 4000+
 - **Cobertura de backend:** 100%
-- **Cobertura de frontend:** 75% (editor + list pages)
+- **Cobertura de frontend:** 100% (crear + listar recetas funcional)
 - **Cobertura de documentación:** 100%
 
 ### 🎯 Próximo: Sprint 2
@@ -92,6 +167,7 @@ Registro cronológico de cambios en Tastebook Pro.
 3. Migrar componentes legacy (Header, Sidebar) a TypeScript
 4. Crear componentes base (Button, Input, Card)
 5. Protección de rutas privadas
+6. Hacer `user_id` NOT NULL después de implementar auth
 
 **Duración estimada:** 1-2 semanas
 

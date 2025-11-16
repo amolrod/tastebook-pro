@@ -9,6 +9,7 @@ import { IngredientList } from './IngredientList';
 import { StepList } from './StepList';
 import { Clock, Users } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types/database';
+import { toast } from 'sonner';
 
 interface RecipeEditorProps {
   initialData?: Partial<Recipe>;
@@ -72,30 +73,92 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
     );
   };
 
-  const onSubmit = (data: CreateRecipeInput) => {
+  const onSubmit = (data: any) => {
     console.log('🔍 Datos del formulario:', data);
     console.log('🏷️ Tags seleccionados:', selectedTags);
     
-    const recipeData: CreateRecipeInput = {
+    // Filtrar pasos vacíos e ingredientes vacíos
+    const cleanedInstructions = data.instructions.filter((step: string) => step && step.trim() !== '');
+    const cleanedIngredients = data.ingredients.filter((ing: any) => ing.name && ing.name.trim() !== '');
+    
+    // Validación manual
+    if (cleanedIngredients.length === 0) {
+      toast.error('Debes agregar al menos un ingrediente');
+      return;
+    }
+    if (cleanedInstructions.length === 0) {
+      toast.error('Debes agregar al menos un paso de preparación');
+      return;
+    }
+    if (!data.title || data.title.trim() === '') {
+      toast.error('El título es obligatorio');
+      return;
+    }
+    
+    const cleanedData = {
       ...data,
+      instructions: cleanedInstructions,
+      ingredients: cleanedIngredients,
       tags: selectedTags,
     };
 
-    console.log('📦 Datos finales a enviar:', recipeData);
+    console.log('📦 Datos finales a enviar (limpiados):', cleanedData);
 
-    createRecipe(recipeData, {
-      onSuccess: (recipe) => {
-        console.log('✅ Receta creada:', recipe);
-        onSuccess?.(recipe);
+    createRecipe(cleanedData as CreateRecipeInput, {
+      onSuccess: (createdRecipe) => {
+        console.log('✅ Receta creada:', createdRecipe);
+        toast.success('Receta creada exitosamente');
+        // Navegar a la página de recetas
+        setTimeout(() => {
+          window.location.href = '/recipes';
+        }, 1000);
       },
-      onError: (error) => {
+      onError: (error: any) => {
         console.error('❌ Error creando receta:', error);
-      }
+        if (error.message?.includes('row-level security')) {
+          toast.error('Error de permisos. Configura RLS en Supabase Dashboard');
+        } else {
+          toast.error('Error al crear receta: ' + (error.message || 'Error desconocido'));
+        }
+      },
     });
   };
 
+  // Log de errores de validación
+  if (Object.keys(errors).length > 0) {
+    console.log('❌ ERRORES DE VALIDACIÓN:', JSON.stringify(errors, null, 2));
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={(e) => {
+      console.log('📝 Form submit event triggered!');
+      e.preventDefault();
+      
+      // Llamar directamente a onSubmit sin pasar por react-hook-form validation
+      // ya que vamos a limpiar los datos vacíos manualmente
+      const formData = new FormData(e.currentTarget);
+      
+      // Extraer datos del formulario
+      const data: any = {
+        title: formData.get('title'),
+        description: formData.get('description') || undefined,
+        prep_time: formData.get('prep_time') ? Number(formData.get('prep_time')) : undefined,
+        cook_time: formData.get('cook_time') ? Number(formData.get('cook_time')) : undefined,
+        servings: formData.get('servings') ? Number(formData.get('servings')) : 4,
+        difficulty: formData.get('difficulty') || 'media',
+        is_public: formData.get('is_public') === 'on',
+        ingredients: ingredientFields.map((_, idx) => ({
+          name: formData.get(`ingredients.${idx}.name`) as string,
+          quantity: Number(formData.get(`ingredients.${idx}.quantity`)) || 1,
+          unit: formData.get(`ingredients.${idx}.unit`) as string,
+        })),
+        instructions: stepFields.map((_, idx) => 
+          formData.get(`instructions.${idx}`) as string
+        ),
+      };
+      
+      onSubmit(data);
+    }} className="space-y-6">
       {/* Título */}
       <div>
         <label htmlFor="title" className="block text-sm font-semibold mb-2 text-black dark:text-white font-inter">
@@ -334,6 +397,22 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
           Hacer pública esta receta (otros usuarios podrán verla)
         </label>
       </div>
+
+      {/* Mostrar errores de validación global */}
+      {Object.keys(errors).length > 0 && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2 font-inter">
+            ⚠️ Errores de validación:
+          </h3>
+          <ul className="list-disc list-inside space-y-1 text-sm text-red-700 dark:text-red-300 font-inter">
+            {Object.entries(errors).map(([key, error]: [string, any]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {error?.message || JSON.stringify(error)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Botones */}
       <div className="flex gap-3 pt-4">

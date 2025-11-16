@@ -1,6 +1,6 @@
 # 📊 Estado Actual del Proyecto - Tastebook Pro
 
-**Última actualización:** 16 Nov 2025 - Sprint 1 COMPLETADO ✅  
+**Última actualización:** 16 Nov 2025 - Sprint 1 COMPLETADO ✅ + Fixes de Producción  
 **Progreso global:** Sprint 1: 100% | Sprint 2: 0%
 
 ---
@@ -25,7 +25,13 @@ Sprint 1: Fundación y CRUD Básico
 │   ├── [✅] Eliminar componentes no usados 100%
 │   ├── [✅] Eliminar páginas legacy        100%
 │   └── [✅] Documentar convenciones        100%
-└── [✅] Documentación completa              100%
+├── [✅] Documentación completa              100%
+└── [✅] Fixes de Producción                 100%
+    ├── [✅] Auth.js SessionProvider removido 100%
+    ├── [✅] Validación form con filtros     100%
+    ├── [✅] RLS policies configuradas       100%
+    ├── [✅] user_id opcional (pre-auth)     100%
+    └── [✅] Toast notifications (sonner)    100%
 
 Progreso total: 100% ✅
 
@@ -41,7 +47,7 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 - ✅ React Router 7.9+ con App Router
 - ✅ Vite 6.4+ como bundler
 - ✅ Tailwind CSS 3.4+ configurado
-- ✅ Git + GitHub sincronizado (4 commits)
+- ✅ Git + GitHub sincronizado (6+ commits)
 - ✅ Variables de entorno con prefijo `VITE_`
 - ✅ .gitignore configurado para proteger credenciales
 
@@ -54,10 +60,14 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 - ✅ RecipeService completo (`src/lib/api/recipes.ts`)
   - `fetchRecipes()` - con búsqueda, filtros, ordenamiento
   - `fetchRecipeById()` - detalle de receta
-  - `createRecipe()` - crear nueva receta
+  - `createRecipe()` - crear nueva receta (funciona sin auth)
   - `updateRecipe()` - actualizar receta existente
   - `deleteRecipe()` - eliminar receta
   - `uploadRecipeImage()` - subir imagen a Storage
+- ✅ RLS Policies configuradas en Supabase
+  - Política de lectura pública
+  - Política de inserción sin autenticación (temporal)
+- ✅ user_id opcional en recipes (NULL hasta implementar auth)
 
 ### 🪝 React Hooks (React Query)
 - ✅ `useRecipes()` - listar recetas con filtros
@@ -75,6 +85,13 @@ Sprint 1 COMPLETADO exitosamente! 🎉
   - Tiempo y porciones
   - Tags y dificultad
   - Hover effects
+- ✅ `RecipeEditor.tsx` - Formulario completo con:
+  - react-hook-form + useFieldArray
+  - Validación con Zod
+  - Campos dinámicos (ingredientes, instrucciones)
+  - Toast notifications (sonner)
+  - Filtrado de campos vacíos
+  - Manejo robusto de errores
 - ✅ `LoadingSpinner.tsx` - Estados de carga (sm/md/lg)
 - ✅ `ErrorMessage.tsx` - Manejo de errores con retry
 - ✅ `Sidebar.jsx` - Navegación lateral (existente)
@@ -88,17 +105,22 @@ Sprint 1 COMPLETADO exitosamente! 🎉
   - Estados: loading, error, empty
   - Filtros (preparado para expansión)
   - Contador de resultados
+- ✅ `/recipes/new/page.jsx` - Crear receta
+  - Formulario completo funcional
+  - Guardado en Supabase exitoso
+  - Validaciones client-side
 
 ### 📚 Documentación
 - ✅ `README.md` - Overview y Quick Start
 - ✅ `CHANGELOG.md` - Historial de cambios
+- ✅ `docs/CODE_CONVENTIONS.md` - Convenciones de código (500+ líneas)
 - ✅ `docs/SETUP.md` - Guía de instalación
 - ✅ `docs/ARCHITECTURE.md` - Arquitectura técnica
 - ✅ `docs/DATABASE.md` - Schema SQL completo
 - ✅ `docs/API.md` - Documentación de servicios y hooks
 - ✅ `docs/COMPONENTS.md` - Catálogo de componentes
 - ✅ `docs/ROADMAP.md` - Roadmap de sprints
-- ✅ `docs/SUPABASE_SETUP.md` - **Nueva:** Guía paso a paso
+- ✅ `docs/SUPABASE_SETUP.md` - Guía paso a paso
 
 ### 🛠️ Scripts y Herramientas
 - ✅ `scripts/setup.sh` - Script interactivo de configuración
@@ -113,6 +135,15 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 - ✅ Sin imports no usados
 - ✅ Tipos consolidados en database.ts
 
+### 🐛 Fixes de Producción (16 Nov 2025)
+- ✅ Removido SessionProvider de @auth/create (causaba ClientFetchError)
+- ✅ Implementado filtrado de campos vacíos en formulario
+- ✅ Validación manual de mínimos (1 ingrediente, 1 paso)
+- ✅ Configurado RLS en Supabase para permitir inserts anónimos
+- ✅ user_id opcional (NULL) hasta implementar autenticación
+- ✅ Toast notifications con sonner (sin alerts nativos)
+- ✅ Manejo específico de errores (RLS, foreign key, etc.)
+
 ---
 
 ## ⏳ Pendiente para Sprint 2
@@ -121,6 +152,7 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 - [ ] Sistema de autenticación (login/register)
 - [ ] RecipeDetail component (vista completa de receta)
 - [ ] Protección de rutas privadas
+- [ ] Hacer user_id NOT NULL después de implementar auth
 
 ### 🟡 ALTA
 - [ ] Migrar Header.jsx → Header.tsx

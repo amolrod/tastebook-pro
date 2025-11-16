@@ -249,17 +249,13 @@ export const RecipeService = {
    */
   async createRecipe(input: CreateRecipeInput): Promise<Recipe> {
     try {
-      // Validar que el usuario esté autenticado
+      // Obtener usuario autenticado si existe
       const { data: { user } } = await supabase.auth.getUser();
       
-      // TEMPORAL: Para desarrollo, usar un user_id de prueba si no está autenticado
-      const userId = user?.id || '00000000-0000-0000-0000-000000000000';
-      
-      // Preparar el input con user_id
-      const recipeInput = {
-        ...input,
-        user_id: userId,
-      };
+      // Preparar el input - solo incluir user_id si hay sesión
+      const recipeInput = user?.id 
+        ? { ...input, user_id: user.id }
+        : input; // Sin user_id para desarrollo (será NULL en la DB)
 
       const { data, error } = await supabase
         .from('recipes')
