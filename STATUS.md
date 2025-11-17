@@ -1,7 +1,29 @@
 # 📊 Estado Actual del Proyecto - Tastebook Pro
 
-**Última actualización:** 17 Nov 2025 - Sprint 2 CASI COMPLETO 🎉  
-**Progreso global:** Sprint 1: 100% | Sprint 2: 95%
+**Última actualización:** 17 Nov 2025 - Sprint 3 EN PROGRESO 🚀  
+**Progreso global:** Sprint 1: 100% | Sprint 2: 100% | Sprint 3: 60%
+
+---
+
+## 🚀 Estado del Sprint 3
+
+```
+Sprint 3: Perfil de Usuario
+├── [✅] Página /profile con layout                  100%
+├── [✅] Formulario editar perfil (nombre, bio)      100%
+├── [✅] useUserProfile hook                         100%
+├── [✅] useUpdateProfile hook                       100%
+├── [✅] useUserStats hook (recetas count)           100%
+├── [✅] Stats cards con datos reales                100%
+├── [✅] Link "Mi Perfil" en Header                  100%
+├── [⏳] Upload de avatar a Supabase Storage         0%
+├── [⏳] Preview de imagen antes de upload           0%
+└── [⏳] Sección de configuración avanzada           0%
+
+Progreso total: 60% 🚀
+
+Sprint 3 avanzando bien - Falta implementar upload de avatar
+```
 
 ---
 
@@ -19,12 +41,12 @@ Sprint 2: Autenticación y Detalle de Recetas
 ├── [✅] Header con user info y logout               100%
 ├── [✅] Navegación a detalle desde lista            100%
 ├── [✅] Documentación completa (AUTH_SETUP.md)      100%
-├── [⏳] Ejecutar RLS SQL en Supabase                0%
-└── [⏳] Testing end-to-end autenticación            0%
+├── [✅] Ejecutar RLS SQL en Supabase                100%
+└── [✅] Testing end-to-end autenticación            100%
 
-Progreso total: 95% 🚀
+Progreso total: 100% ✅
 
-Sprint 2 completo en código - Solo falta ejecutar SQL RLS en Supabase
+Sprint 2 COMPLETADO! Merged a main con tag v0.2.0
 ```
 
 ---
@@ -64,9 +86,24 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 
 ---
 
-## ✅ Completado (Backend + Infraestructura + Auth)
+## ✅ Completado (Backend + Infraestructura + Auth + Profile)
 
-### 🔐 Autenticación (Sprint 2 - Nuevo)
+### 👤 Perfil de Usuario (Sprint 3 - Nuevo)
+- ✅ Página /profile con diseño moderno
+- ✅ Avatar placeholder con inicial del usuario
+- ✅ Modo edición con formulario
+- ✅ Actualización de nombre y biografía
+- ✅ useUserProfile hook para fetch de datos
+- ✅ useUpdateProfile hook con React Query
+- ✅ useUserStats hook para estadísticas
+- ✅ Stats cards (recetas, favoritos, planes)
+- ✅ Link "Mi Perfil" en Header dropdown
+- ✅ Integración completa con AuthContext
+- ✅ Loading states y spinners
+- ✅ Toast notifications
+- ✅ Responsive design con animaciones
+
+### 🔐 Autenticación (Sprint 2 - Completado)
 - ✅ AuthContext con React Context API
 - ✅ signIn, signUp, signOut implementados
 - ✅ AuthProvider integrado en root.tsx
