@@ -331,7 +331,7 @@ export default function RecipesPage() {
 }
 
 // Componente de tarjeta con bot\u00f3n de favorito
-function RecipeCard({ recipe, totalTime, difficultyLabels, user, navigate }) {
+function RecipeCardWithFavorite({ recipe, totalTime, difficultyLabels, user, onNavigate }) {
   const { data: isFavorite = false, isLoading: isFavoriteLoading } = useIsFavorite(user?.id, recipe.id);
   const toggleFavorite = useToggleFavorite();
 
@@ -339,7 +339,7 @@ function RecipeCard({ recipe, totalTime, difficultyLabels, user, navigate }) {
     e.stopPropagation();
     
     if (!user) {
-      toast.error('Debes iniciar sesión para guardar favoritos');
+      toast.error('Debes iniciar sesi\u00f3n para guardar favoritos');
       return;
     }
     
@@ -350,13 +350,9 @@ function RecipeCard({ recipe, totalTime, difficultyLabels, user, navigate }) {
     });
   };
 
-  const handleCardClick = () => {
-    navigate(`/recipes/${recipe.id}`);
-  };
-
   return (
     <div
-      onClick={handleCardClick}
+      onClick={onNavigate}
       className="bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
     >
       {/* Image */}
