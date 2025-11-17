@@ -2,6 +2,5 @@ import type { Config } from '@react-router/dev/config';
 
 export default {
 	appDirectory: './src/app',
-	ssr: true,
-	prerender: ['/*?'],
+	ssr: false, // Desactivar SSR para desarrollo
 } satisfies Config;
