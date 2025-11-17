@@ -2,8 +2,8 @@ import { useParams, useNavigate } from 'react-router';
 import { useRecipe, useDeleteRecipe } from '../../hooks/useRecipes';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
-import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2, Heart, BookOpen, Flame } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import type { Recipe } from '../../types/database';
@@ -31,11 +31,14 @@ export function RecipeDetail() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const { user } = useAuth();
-  const { data: isFavorite = false } = useIsFavorite(user?.id, id);
+  const { data: isFavorite = false, isLoading: isFavoriteLoading } = useIsFavorite(user?.id, id);
   const toggleFavorite = useToggleFavorite();
 
   const handleFavoriteClick = () => {
-    if (!user || !id) return;
+    if (!user || !id) {
+      toast.error('Debes iniciar sesión para guardar favoritos');
+      return;
+    }
     
     toggleFavorite.mutate({
       userId: user.id,
@@ -63,40 +66,33 @@ export function RecipeDetail() {
       try {
         await navigator.share({
           title: recipe?.title,
-          text: recipe?.description || undefined,
+          text: recipe?.description || '',
           url: window.location.href,
         });
       } catch (error) {
-        // Usuario canceló o error
+        console.error('Error sharing:', error);
       }
     } else {
-      // Fallback: copiar URL al portapapeles
       navigator.clipboard.writeText(window.location.href);
-      toast.success('URL copiada al portapapeles');
+      toast.success('Link copiado al portapapeles');
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-screen bg-[#F3F3F3] dark:bg-[#0A0A0A]">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  if (error) {
+  if (error || !recipe) {
     return (
-      <ErrorMessage
-        error={error}
-        onRetry={refetch}
-      />
-    );
-  }
-
-  if (!recipe) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">Receta no encontrada</p>
+      <div className="flex items-center justify-center min-h-screen bg-[#F3F3F3] dark:bg-[#0A0A0A] p-4">
+        <ErrorMessage
+          error={error || new Error('Receta no encontrada')}
+          onRetry={refetch}
+        />
       </div>
     );
   }
@@ -104,53 +100,128 @@ export function RecipeDetail() {
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header con botones de acción */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+    <div className="min-h-screen bg-[#F3F3F3] dark:bg-[#0A0A0A]">
+      {/* Hero Image Section */}
+      <div className="relative h-96 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-900 dark:to-black">
+        {recipe.image_url ? (
+          <>
+            <img
+              src={recipe.image_url}
+              alt={recipe.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ChefHat size={120} className="text-gray-400 dark:text-gray-700" />
+          </div>
+        )}
+
+        {/* Back Button */}
+        <motion.button
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate('/recipes')}
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#10b981] dark:hover:text-[#10b981] transition-colors font-inter"
+          className="absolute top-6 left-6 flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
         >
           <ArrowLeft size={20} />
-          Volver a recetas
-        </button>
+          <span className="hidden sm:inline font-inter font-semibold">Volver</span>
+        </motion.button>
 
-        <div className="flex items-center gap-2">
+        {/* Action Buttons */}
+        <div className="absolute top-6 right-6 flex gap-3">
           {user && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleFavoriteClick}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+              disabled={toggleFavorite.isPending || isFavoriteLoading}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold font-inter shadow-lg backdrop-blur-md transition-all ${
                 isFavorite
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-[#E6E6E6] dark:border-[#333333] hover:bg-gray-50 dark:hover:bg-[#2A2A2A]'
+                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                  : 'bg-white/90 dark:bg-[#1E1E1E]/90 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-[#1E1E1E]'
+              } ${
+                toggleFavorite.isPending || isFavoriteLoading
+                  ? 'opacity-50 cursor-not-allowed'
+                  : ''
               }`}
             >
-              <Heart
-                className={`w-5 h-5 transition-all ${
-                  isFavorite
-                    ? 'fill-red-500 text-red-500'
-                    : 'text-gray-600 dark:text-gray-400'
-                }`}
-              />
-              <span className={`font-medium ${
-                isFavorite
-                  ? 'text-red-500'
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}>
-                {isFavorite ? 'En Favoritos' : 'Guardar'}
-              </span>
+              {toggleFavorite.isPending || isFavoriteLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <Heart
+                    className={`w-5 h-5 transition-all ${
+                      isFavorite ? 'fill-white' : ''
+                    }`}
+                  />
+                  <span className="hidden sm:inline">
+                    {isFavorite ? 'Favorito' : 'Guardar'}
+                  </span>
+                </>
+              )}
             </motion.button>
           )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleShare}
-            className="p-2 rounded-lg border border-[#E6E6E6] dark:border-[#333333] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors"
-            title="Compartir"
+            className="p-3 bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all"
           >
-            <Share2 size={20} className="text-gray-600 dark:text-gray-400" />
-          </button>
+            <Share2 size={20} className="text-gray-700 dark:text-gray-300" />
+          </motion.button>
+
+          {user?.id === recipe.user_id && (
+            <>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate(`/recipes/${id}/edit`)}
+                className="p-3 bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
+                <Edit size={20} className="text-gray-700 dark:text-gray-300" />
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-3 bg-red-500/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all hover:bg-red-600"
+              >
+                <Trash2 size={20} className="text-white" />
+              </motion.button>
+            </>
+          )}
+        </div>
+
+        {/* Title Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-8">
+          <div className="max-w-5xl mx-auto">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-5xl font-bold text-white mb-4 font-sora"
+            >
+              {recipe.title}
+            </motion.h1>
+            {recipe.description && (
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-xl text-white/90 font-inter max-w-3xl"
+              >
+                {recipe.description}
+              </motion.p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           
           <button
             onClick={() => navigate(`/recipes/${id}/edit`)}
@@ -249,75 +320,112 @@ export function RecipeDetail() {
         )}
       </div>
 
-      {/* Ingredientes */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black dark:text-white mb-4 font-sora">
-          Ingredientes
-        </h2>
-        <div className="bg-white dark:bg-[#1E1E1E] rounded-xl p-6 border border-[#E6E6E6] dark:border-[#333333]">
-          <ul className="space-y-3">
-            {recipe.ingredients.map((ingredient, index) => (
-              <li key={index} className="flex items-start gap-3 font-inter">
-                <span className="flex-shrink-0 w-2 h-2 rounded-full bg-[#10b981] mt-2"></span>
-                <span className="text-black dark:text-white">
-                  <span className="font-semibold">{ingredient.quantity} {ingredient.unit}</span>
-                  {' de '}
-                  {ingredient.name}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {/* Ingredients */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-white dark:bg-[#1E1E1E] rounded-2xl p-8 shadow-lg"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-[#10b981]/10 rounded-xl">
+                <BookOpen className="w-6 h-6 text-[#10b981]" />
+              </div>
+              <h2 className="text-2xl font-bold text-black dark:text-white font-sora">
+                Ingredientes
+              </h2>
+            </div>
+            <ul className="space-y-3">
+              {recipe.ingredients?.map((ingredient, index) => (
+                <li
+                  key={index}
+                  className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-colors"
+                >
+                  <div className="w-2 h-2 bg-[#10b981] rounded-full mt-2 flex-shrink-0"></div>
+                  <span className="text-gray-700 dark:text-gray-300 font-inter">
+                    <span className="font-semibold">
+                      {ingredient.quantity} {ingredient.unit}
+                    </span>{' '}
+                    {ingredient.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Instructions */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-white dark:bg-[#1E1E1E] rounded-2xl p-8 shadow-lg"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-[#10b981]/10 rounded-xl">
+                <ChefHat className="w-6 h-6 text-[#10b981]" />
+              </div>
+              <h2 className="text-2xl font-bold text-black dark:text-white font-sora">
+                Instrucciones
+              </h2>
+            </div>
+            <ol className="space-y-4">
+              {recipe.steps?.map((step, index) => (
+                <li key={index} className="flex gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[#10b981] to-[#059669] text-white rounded-full flex items-center justify-center font-bold font-sora">
+                    {index + 1}
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 font-inter leading-relaxed pt-2">
+                    {step}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </motion.div>
         </div>
       </div>
 
-      {/* Instrucciones */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black dark:text-white mb-4 font-sora">
-          Instrucciones
-        </h2>
-        <div className="space-y-4">
-          {recipe.instructions.map((instruction, index) => (
-            <div key={index} className="flex gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#10b981] text-white flex items-center justify-center font-semibold text-sm">
-                {index + 1}
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={() => setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-[#1E1E1E] rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <h3 className="text-2xl font-bold text-black dark:text-white mb-4 font-sora">
+                ¿Eliminar receta?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6 font-inter">
+                Esta acción no se puede deshacer. La receta se eliminará permanentemente.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold font-inter transition-all disabled:opacity-50"
+                >
+                  {isDeleting ? 'Eliminando...' : 'Eliminar'}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-[#262626] dark:hover:bg-[#333333] text-gray-700 dark:text-gray-300 py-3 rounded-xl font-semibold font-inter transition-all"
+                >
+                  Cancelar
+                </button>
               </div>
-              <div className="flex-1 bg-white dark:bg-[#1E1E1E] rounded-xl p-4 border border-[#E6E6E6] dark:border-[#333333]">
-                <p className="text-black dark:text-white font-inter">{instruction}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Modal de confirmación de eliminación */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#1E1E1E] rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold text-black dark:text-white mb-4 font-sora">
-              ¿Eliminar receta?
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 font-inter">
-              Esta acción no se puede deshacer. La receta será eliminada permanentemente.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={isDeleting}
-                className="flex-1 py-3 rounded-lg border border-[#E6E6E6] dark:border-[#333333] text-black dark:text-white hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors font-inter font-semibold"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 py-3 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-inter font-semibold disabled:opacity-50"
-              >
-                {isDeleting ? 'Eliminando...' : 'Eliminar'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
