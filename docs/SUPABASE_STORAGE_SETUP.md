@@ -1,52 +1,150 @@
 # 🗄️ Configuración de Supabase Storage para Avatares
 
-Este documento explica cómo configurar Supabase Storage para permitir la subida de avatares de usuario.
+**Estado Actual:** El sistema usa **base64** temporalmente para guardar avatares directamente en la base de datos. Esto funciona pero no es óptimo para producción.
 
 ---
 
-## 📋 Opción Actual: Usar Bucket 'public' (Más Simple)
+## ⚠️ Configuración REQUERIDA para usar Storage
 
-Por defecto, Supabase crea un bucket llamado `public` que está disponible para todos los proyectos. El hook `useUploadAvatar` está configurado para usar este bucket.
+Para usar Supabase Storage en lugar de base64, sigue estos pasos:
 
-### Ventajas:
-- ✅ No requiere crear bucket nuevo
-- ✅ Ya está público por defecto
-- ✅ Funciona inmediatamente
+### 1. Crear Bucket en Supabase
 
-### Configuración de Políticas RLS
+1. Ve a https://supabase.com/dashboard
+2. Selecciona tu proyecto **Tastebook Pro**
+3. Ve a **Storage** en el menú lateral
+4. Haz clic en **New bucket**
+5. Configura así:
+   ```
+   Name: avatars
+   Public bucket: ✅ ACTIVADO
+   File size limit: 2 MB
+   Allowed MIME types: image/*
+   ```
+6. Haz clic en **Create bucket**
 
-Solo necesitas agregar políticas para permitir subida y eliminación. Ve a **Storage** → **Policies** → bucket `public` y agrega:
+### 2. Configurar Políticas RLS
+
+Ve a **Storage** → **Policies** → bucket `avatars` y crea estas políticas:
+
+#### Política 1: Lectura Pública
+```sql
+CREATE POLICY "Anyone can view avatars"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'avatars');
+```
+
+#### Política 2: Upload Autenticado
+```sql
+CREATE POLICY "Authenticated users can upload avatars"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'avatars' 
+  AND auth.role() = 'authenticated'
+);
+```
+
+#### Política 3: Update Propio Avatar
+```sql
+CREATE POLICY "Users can update own avatar"
+ON storage.objects FOR UPDATE
+USING (
+  bucket_id = 'avatars' 
+  AND auth.role() = 'authenticated'
+);
+```
+
+#### Política 4: Delete Propio Avatar
+```sql
+CREATE POLICY "Users can delete own avatar"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'avatars' 
+  AND auth.role() = 'authenticated'
+);
+```
+
+### 3. Actualizar el Hook
+
+Después de crear el bucket, actualiza `useUploadAvatar.ts`:
+
+**Reemplazar esta sección:**
+```typescript
+// TEMPORALMENTE: Convertir imagen a base64
+const reader = new FileReader();
+const base64Promise = new Promise<string>((resolve, reject) => {
+  reader.onload = () => resolve(reader.result as string);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+
+const base64Image = await base64Promise;
+
+const { error: updateError } = await supabase
+  .from('users')
+  .update({ avatar_url: base64Image })
+  .eq('id', userId);
+```
+
+**Por esto:**
+```typescript
+// Generar nombre único
+const fileExt = file.name.split('.').pop();
+const fileName = `${userId}-${Date.now()}.${fileExt}`;
+
+// Subir imagen
+const { error: uploadError } = await supabase.storage
+  .from('avatars')
+  .upload(fileName, file, {
+    cacheControl: '3600',
+    upsert: true,
+  });
+
+if (uploadError) throw uploadError;
+
+// Obtener URL pública
+const { data: { publicUrl } } = supabase.storage
+  .from('avatars')
+  .getPublicUrl(fileName);
+
+// Actualizar usuario
+const { error: updateError } = await supabase
+  .from('users')
+  .update({ avatar_url: publicUrl })
+  .eq('id', userId);
+```
 
 ---
 
-## 📋 Opción Alternativa: Crear Bucket Dedicado `avatars`
+## ✅ Ventajas de usar Storage vs Base64
 
-Si prefieres tener un bucket dedicado para avatares:
+### Base64 (Actual - Temporal)
+- ✅ Funciona inmediatamente sin configuración
+- ❌ Aumenta tamaño de la BD
+- ❌ Más lento al cargar
+- ❌ No recomendado para producción
 
-### 1. Acceder a Supabase Storage
+### Storage (Recomendado)
+- ✅ Optimizado para archivos
+- ✅ CDN incluido
+- ✅ Mejor performance
+- ✅ Fácil de escalar
+- ✅ URLs públicas permanentes
 
-1. Ve a tu proyecto en https://supabase.com/dashboard
-2. En el menú lateral, selecciona **Storage**
-3. Haz clic en **New Bucket** (Nuevo Bucket)
+---
 
-### 2. Configurar el Bucket `avatars`
+## 🧪 Testing
 
-Completa el formulario con estos valores:
+Después de configurar:
 
-```
-Name: avatars
-Public bucket: ✅ (marcado)
-File size limit: 2MB
-Allowed MIME types: image/*
-```
+1. Ve a /profile
+2. Haz clic en el botón de cámara del avatar
+3. Selecciona una imagen
+4. Verifica que se suba correctamente
+5. Recarga la página y verifica que persista
+6. En Supabase Storage → `avatars`, deberías ver el archivo
 
-**Importante:** Marca la opción **Public bucket** para que las imágenes sean accesibles públicamente.
-
-**Nota:** Si creas este bucket, deberás cambiar el hook `useUploadAvatar.ts` para usar `'avatars'` en lugar de `'public'`.
-
-### 3. Configurar Políticas de Seguridad (RLS)
-
-Ve a **Storage** → **Policies** → bucket correspondiente y agrega estas políticas:
+---
 
 ## 🧪 Testing
 
