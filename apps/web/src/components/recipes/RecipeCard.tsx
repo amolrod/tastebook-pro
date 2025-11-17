@@ -1,5 +1,9 @@
-import { Clock, Users, Star } from 'lucide-react';
+import { Clock, Users, Star, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { Recipe } from '../../lib/api/recipes';
+import { useAuth } from '../../contexts/AuthContext';
+import { useIsFavorite } from '../../hooks/useIsFavorite';
+import { useToggleFavorite } from '../../hooks/useToggleFavorite';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -16,6 +20,21 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
   const difficulty = recipe.difficulty || 'facil';
   const difficultyStyle = difficultyConfig[difficulty];
+  
+  const { user } = useAuth();
+  const { data: isFavorite = false } = useIsFavorite(user?.id, recipe.id);
+  const toggleFavorite = useToggleFavorite();
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    
+    toggleFavorite.mutate({
+      userId: user.id,
+      recipeId: recipe.id,
+      isFavorite,
+    });
+  };
 
   return (
     <div
@@ -34,6 +53,24 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             <span className="text-4xl">🍽️</span>
           </div>
+        )}
+        
+        {/* Favorite Button */}
+        {user && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleFavoriteClick}
+            className="absolute top-3 left-3 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-sm p-2 rounded-full shadow-sm hover:shadow-md transition-shadow"
+          >
+            <Heart
+              className={`w-5 h-5 transition-all ${
+                isFavorite
+                  ? 'fill-red-500 text-red-500'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            />
+          </motion.button>
         )}
         
         {/* Rating Badge */}

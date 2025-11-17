@@ -2,10 +2,14 @@ import { useParams, useNavigate } from 'react-router';
 import { useRecipe, useDeleteRecipe } from '../../hooks/useRecipes';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
-import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2 } from 'lucide-react';
+import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2, Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import type { Recipe } from '../../types/database';
+import { useAuth } from '../../contexts/AuthContext';
+import { useIsFavorite } from '../../hooks/useIsFavorite';
+import { useToggleFavorite } from '../../hooks/useToggleFavorite';
 
 const DIFFICULTY_LABELS = {
   facil: 'Fácil',
@@ -25,6 +29,20 @@ export function RecipeDetail() {
   const { data: recipe, isLoading, error, refetch } = useRecipe(id!);
   const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipe();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  const { user } = useAuth();
+  const { data: isFavorite = false } = useIsFavorite(user?.id, id);
+  const toggleFavorite = useToggleFavorite();
+
+  const handleFavoriteClick = () => {
+    if (!user || !id) return;
+    
+    toggleFavorite.mutate({
+      userId: user.id,
+      recipeId: id,
+      isFavorite,
+    });
+  };
 
   const handleDelete = () => {
     if (!id) return;
@@ -98,6 +116,34 @@ export function RecipeDetail() {
         </button>
 
         <div className="flex items-center gap-2">
+          {user && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleFavoriteClick}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all ${
+                isFavorite
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-[#E6E6E6] dark:border-[#333333] hover:bg-gray-50 dark:hover:bg-[#2A2A2A]'
+              }`}
+            >
+              <Heart
+                className={`w-5 h-5 transition-all ${
+                  isFavorite
+                    ? 'fill-red-500 text-red-500'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              />
+              <span className={`font-medium ${
+                isFavorite
+                  ? 'text-red-500'
+                  : 'text-gray-700 dark:text-gray-300'
+              }`}>
+                {isFavorite ? 'En Favoritos' : 'Guardar'}
+              </span>
+            </motion.button>
+          )}
+
           <button
             onClick={handleShare}
             className="p-2 rounded-lg border border-[#E6E6E6] dark:border-[#333333] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors"

@@ -311,6 +311,14 @@ export default function ProfilePage() {
                     <Home size={16} className="mr-2" />
                     Ir a Recetas
                   </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/favorites')}
+                  >
+                    <Heart size={16} className="mr-2" />
+                    Mis Favoritos
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => {}}>
                     <Settings size={16} className="mr-2" />
                     Configuración
@@ -350,7 +358,8 @@ export default function ProfilePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="text-center"
+                  className="text-center cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1E1E1E] rounded-xl p-4 transition-colors"
+                  onClick={() => navigate('/favorites')}
                 >
                   <div className="flex items-center justify-center w-12 h-12 mx-auto mb-2 rounded-full bg-[#ff6b35]/10">
                     <Heart size={24} className="text-[#ff6b35]" />

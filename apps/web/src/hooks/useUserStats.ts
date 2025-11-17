@@ -19,17 +19,17 @@ export function useUserStats(userId: string | undefined) {
         };
       }
 
-      // Obtener count de recetas del usuario
+            // Obtener count de recetas del usuario
       const { count: recipesCount } = await supabase
         .from('recipes')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId);
 
-      // TODO: Implementar favorites cuando exista la tabla
-      // const { count: favoritesCount } = await supabase
-      //   .from('favorites')
-      //   .select('*', { count: 'exact', head: true })
-      //   .eq('user_id', userId);
+      // Obtener count de favoritos
+      const { count: favoritesCount } = await supabase
+        .from('favorites')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
 
       // TODO: Implementar plans cuando exista la tabla
       // const { count: plansCount } = await supabase
@@ -39,7 +39,7 @@ export function useUserStats(userId: string | undefined) {
 
       return {
         recipesCount: recipesCount || 0,
-        favoritesCount: 0, // TODO
+        favoritesCount: favoritesCount || 0,
         plansCount: 0, // TODO
       };
     },

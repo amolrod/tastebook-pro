@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Bell, Plus, Menu, LogOut, User } from "lucide-react";
+import { Search, Bell, Plus, Menu, LogOut, User, Heart } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -115,6 +115,16 @@ export default function Header({
                     >
                       <User size={16} />
                       Mi Perfil
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/favorites");
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left flex items-center gap-2 text-[#4B4B4B] dark:text-[#B0B0B0] hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-colors font-inter text-sm"
+                    >
+                      <Heart size={16} />
+                      Mis Favoritos
                     </button>
                     <button
                       onClick={handleLogout}
