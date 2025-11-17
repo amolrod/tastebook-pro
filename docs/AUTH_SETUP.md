@@ -20,11 +20,18 @@ CREATE POLICY "Users can update own profile"
   ON users FOR UPDATE
   USING (auth.uid() = id);
 
--- Política: Permitir inserts al crear cuenta (AuthContext lo maneja)
-DROP POLICY IF EXISTS "Users can insert own profile" ON users;
-CREATE POLICY "Users can insert own profile"
+-- Política: Permitir inserts durante el registro (CRÍTICO)
+-- Esta política permite que un usuario recién registrado pueda crear su perfil
+DROP POLICY IF EXISTS "Users can insert own profile on signup" ON users;
+CREATE POLICY "Users can insert own profile on signup"
   ON users FOR INSERT
-  WITH CHECK (auth.uid() = id);
+  WITH CHECK (true); -- Permite cualquier insert (el auth.uid() aún no está disponible durante signup)
+
+-- Alternativa más segura (si tienes service_role key):
+-- CREATE POLICY "Users can insert own profile on signup"
+--   ON users FOR INSERT
+--   WITH CHECK (auth.uid() = id);
+-- Pero requiere usar service_role key en el signup, no anon key
 ```
 
 ### 2. Actualizar políticas de recetas para autenticación

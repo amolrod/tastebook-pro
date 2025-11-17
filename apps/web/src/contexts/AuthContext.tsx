@@ -46,56 +46,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('🔵 Iniciando login con:', { email, passwordLength: password.length });
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
+      console.log('🔵 Respuesta de signIn:', { data, error });
+      
+      if (error) {
+        console.error('❌ Error en signIn:', error);
+      } else {
+        console.log('✅ Login exitoso:', data.user?.id);
+      }
+      
       return { error };
     } catch (error) {
+      console.error('❌ Error inesperado en signIn:', error);
       return { error: error as Error };
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
     try {
+      console.log('🔵 Iniciando registro con:', { email, fullName, passwordLength: password.length });
+      
       // 1. Crear usuario en Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+          }
+        }
       });
 
-      if (authError) return { error: authError };
-      if (!authData.user) return { error: new Error('No se pudo crear el usuario') };
+      console.log('🔵 Respuesta de signUp:', { authData, authError });
+
+      if (authError) {
+        console.error('❌ Error en signUp:', authError);
+        return { error: authError };
+      }
+      if (!authData.user) {
+        console.error('❌ No se creó el usuario');
+        return { error: new Error('No se pudo crear el usuario') };
+      }
+
+      console.log('✅ Usuario creado en Auth:', authData.user.id);
 
       // 2. Crear registro en tabla users
       const { error: profileError } = await supabase
         .from('users')
-        .insert([
-          {
-            id: authData.user.id,
-            email: authData.user.email!,
-            full_name: fullName,
-            preferences: {},
-            stats: {
-              recipes_created: 0,
-              recipes_favorited: 0,
-              meal_plans_created: 0,
-            },
-          },
-        ]);
+        .insert([{
+          id: authData.user.id,
+          email: authData.user.email!,
+          full_name: fullName,
+        }]);
 
       if (profileError) {
-        console.error('Error creating user profile:', profileError);
+        console.error('❌ Error creating user profile:', profileError);
         return { error: new Error('Error al crear perfil de usuario') };
       }
 
+      console.log('✅ Perfil de usuario creado');
       return { error: null };
     } catch (error) {
+      console.error('❌ Error inesperado en signUp:', error);
       return { error: error as Error };
     }
-  };
-
-  const signOut = async () => {
+  };  const signOut = async () => {
     await supabase.auth.signOut();
   };
 
