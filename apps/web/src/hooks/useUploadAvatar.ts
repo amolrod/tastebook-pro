@@ -22,10 +22,10 @@ export function useUploadAvatar() {
         throw new Error('El archivo debe ser una imagen');
       }
 
-      // Generar nombre único
+            // Generar nombre único
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const filePath = fileName; // Sin carpeta, directamente en el bucket
 
       // Eliminar avatar anterior si existe
       const { data: profile } = await supabase
@@ -35,22 +35,20 @@ export function useUploadAvatar() {
         .single();
 
       if (profile?.avatar_url) {
-        // Extraer nombre del archivo de la URL
+        // Extraer solo el nombre del archivo de la URL
         const urlParts = profile.avatar_url.split('/');
         const oldFileName = urlParts[urlParts.length - 1];
-        if (oldFileName && oldFileName.includes(userId)) {
-          await supabase.storage
-            .from('avatars')
-            .remove([oldFileName]);
+        if (oldFileName) {
+          await supabase.storage.from('public').remove([oldFileName]);
         }
       }
 
-      // Subir nueva imagen
+      // Subir nueva imagen al bucket 'public' (que existe por defecto)
       const { error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from('public')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true,
         });
 
       if (uploadError) {
@@ -60,7 +58,7 @@ export function useUploadAvatar() {
 
       // Obtener URL pública
       const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
+        .from('public')
         .getPublicUrl(filePath);
 
       // Actualizar usuario

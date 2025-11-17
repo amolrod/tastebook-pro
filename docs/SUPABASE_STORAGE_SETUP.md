@@ -1,102 +1,52 @@
-# 🖼️ Configuración de Supabase Storage para Avatares
+# 🗄️ Configuración de Supabase Storage para Avatares
 
-## Objetivo
-
-Configurar un bucket público en Supabase Storage para almacenar los avatares de los usuarios de Tastebook Pro.
+Este documento explica cómo configurar Supabase Storage para permitir la subida de avatares de usuario.
 
 ---
 
-## 📋 Pasos de Configuración
+## 📋 Opción Actual: Usar Bucket 'public' (Más Simple)
 
-### 1. Crear Bucket de Storage
+Por defecto, Supabase crea un bucket llamado `public` que está disponible para todos los proyectos. El hook `useUploadAvatar` está configurado para usar este bucket.
+
+### Ventajas:
+- ✅ No requiere crear bucket nuevo
+- ✅ Ya está público por defecto
+- ✅ Funciona inmediatamente
+
+### Configuración de Políticas RLS
+
+Solo necesitas agregar políticas para permitir subida y eliminación. Ve a **Storage** → **Policies** → bucket `public` y agrega:
+
+---
+
+## 📋 Opción Alternativa: Crear Bucket Dedicado `avatars`
+
+Si prefieres tener un bucket dedicado para avatares:
+
+### 1. Acceder a Supabase Storage
 
 1. Ve a tu proyecto en https://supabase.com/dashboard
-2. Selecciona tu proyecto **Tastebook Pro**
-3. En el menú lateral, ve a **Storage**
-4. Haz clic en **New bucket**
-5. Configura el bucket:
-   - **Name:** `avatars`
-   - **Public bucket:** ✅ Activado (para que las URLs sean públicas)
-   - **File size limit:** 2 MB
-   - **Allowed MIME types:** `image/*`
-6. Haz clic en **Create bucket**
+2. En el menú lateral, selecciona **Storage**
+3. Haz clic en **New Bucket** (Nuevo Bucket)
 
-### 2. Configurar Políticas de Acceso (RLS)
+### 2. Configurar el Bucket `avatars`
 
-El bucket debe permitir:
-- ✅ **SELECT (read):** Cualquiera puede ver los avatares
-- ✅ **INSERT (upload):** Solo usuarios autenticados pueden subir
-- ✅ **DELETE:** Solo usuarios autenticados pueden eliminar sus propios avatares
+Completa el formulario con estos valores:
 
-#### Ejecutar SQL para Políticas
-
-Ve a **SQL Editor** y ejecuta:
-
-```sql
--- ============================================
--- POLÍTICAS RLS PARA BUCKET AVATARS
--- ============================================
-
--- 1. Permitir lectura pública de avatares
-CREATE POLICY "Avatars are publicly accessible"
-ON storage.objects FOR SELECT
-TO public
-USING (bucket_id = 'avatars');
-
--- 2. Permitir upload solo a usuarios autenticados
-CREATE POLICY "Users can upload their own avatar"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (
-  bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-
--- 3. Permitir que usuarios eliminen su propio avatar
-CREATE POLICY "Users can delete their own avatar"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (
-  bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
-
--- 4. Permitir que usuarios actualicen su propio avatar
-CREATE POLICY "Users can update their own avatar"
-ON storage.objects FOR UPDATE
-TO authenticated
-USING (
-  bucket_id = 'avatars' 
-  AND (storage.foldername(name))[1] = auth.uid()::text
-);
+```
+Name: avatars
+Public bucket: ✅ (marcado)
+File size limit: 2MB
+Allowed MIME types: image/*
 ```
 
-### 3. Verificar Configuración
+**Importante:** Marca la opción **Public bucket** para que las imágenes sean accesibles públicamente.
 
-#### 3.1 Verificar Bucket
+**Nota:** Si creas este bucket, deberás cambiar el hook `useUploadAvatar.ts` para usar `'avatars'` en lugar de `'public'`.
 
-En **Storage**, deberías ver el bucket `avatars` con:
-- ✅ Icono de candado abierto (público)
-- ✅ 0 files (vacío al inicio)
+### 3. Configurar Políticas de Seguridad (RLS)
 
-#### 3.2 Verificar Políticas
-
-Ejecuta en SQL Editor:
-
-```sql
-SELECT 
-    policyname,
-    cmd,
-    qual,
-    with_check
-FROM pg_policies
-WHERE schemaname = 'storage'
-  AND tablename = 'objects';
-```
-
-Deberías ver 4 políticas para el bucket `avatars`.
-
----
+Ve a **Storage** → **Policies** → bucket correspondiente y agrega estas políticas:
 
 ## 🧪 Testing
 
