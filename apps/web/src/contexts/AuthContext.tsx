@@ -19,6 +19,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Solo ejecutar en el cliente
+    if (typeof window === 'undefined') {
+      setLoading(false);
+      return;
+    }
+
     // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
