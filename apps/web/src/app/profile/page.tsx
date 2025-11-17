@@ -18,6 +18,8 @@ import {
   ChefHat,
   Flame,
   Target,
+  ArrowLeft,
+  Home,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
@@ -96,6 +98,17 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#F3F3F3] dark:bg-[#0A0A0A]">
+      {/* Botón de navegación fijo */}
+      <div className="fixed top-4 left-4 z-50">
+        <button
+          onClick={() => navigate('/recipes')}
+          className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1E1E1E] text-gray-700 dark:text-gray-300 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 border border-gray-200 dark:border-[#333333]"
+        >
+          <Home size={20} className="text-[#10b981]" />
+          <span className="font-semibold font-inter hidden sm:inline">Inicio</span>
+        </button>
+      </div>
+
       {/* Hero Section con Cover + Avatar */}
       <div className="relative">
         {/* Cover Image con Gradiente */}
@@ -290,6 +303,14 @@ export default function ProfilePage() {
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => navigate('/recipes')}
+                  >
+                    <Home size={16} className="mr-2" />
+                    Ir a Recetas
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => {}}>
                     <Settings size={16} className="mr-2" />
                     Configuración
