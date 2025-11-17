@@ -104,7 +104,13 @@
 
 5. **Verificar conexión**
    ```bash
-   pnpm dev
+   pnpm devrecipes.ts:280 Error in createRecipe: Error: Debes estar autenticado para crear una receta
+    at Object.createRecipe (recipes.ts:277:15)
+
+useRecipes.ts:210 Error creating recipe: Error: Debes estar autenticado para crear una receta
+    at Object.createRecipe (recipes.ts:277:15)
+RecipeEditor.tsx:93 ❌ Error creando receta: Error: Debes estar autenticado para crear una receta
+    at Object.createRecipe (recipes.ts:277:15)
    ```
    - Abrir http://localhost:4000/recipes
    - Debería mostrar "No hay recetas"

@@ -31,8 +31,20 @@ import { HotReloadIndicator } from '../__create/HotReload';
 import { useSandboxStore } from '../__create/hmr-sandbox-store';
 import type { Route } from './+types/root';
 import { useDevServerHeartbeat } from '../__create/useDevServerHeartbeat';
+import { AuthProvider } from '../contexts/AuthContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const links = () => [];
+
+// Crear QueryClient para React Query
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutos
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 if (globalThis.window && globalThis.window !== undefined) {
   globalThis.window.fetch = fetch;
@@ -388,5 +400,11 @@ export function Layout({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Outlet />
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }

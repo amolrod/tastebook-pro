@@ -1,7 +1,28 @@
 # 📊 Estado Actual del Proyecto - Tastebook Pro
 
-**Última actualización:** 16 Nov 2025 - Sprint 1 COMPLETADO ✅ + Fixes de Producción  
-**Progreso global:** Sprint 1: 100% | Sprint 2: 0%
+**Última actualización:** 17 Nov 2025 - Sprint 2 EN PROGRESO 🚀  
+**Progreso global:** Sprint 1: 100% | Sprint 2: 85%
+
+---
+
+## 🚀 Estado del Sprint 2
+
+```
+Sprint 2: Autenticación y Detalle de Recetas
+├── [✅] AuthContext y AuthProvider          100%
+├── [✅] Páginas Login y Register            100%
+├── [✅] ProtectedRoute component            100%
+├── [✅] RecipeDetail component              100%
+├── [✅] Ruta /recipes/:id                   100%
+├── [✅] Header con user info y logout       100%
+├── [✅] Navegación a detalle desde lista    100%
+├── [⏳] Configurar RLS con auth (SQL)       0%
+└── [⏳] Testing end-to-end                  0%
+
+Progreso total: 85% ⏳
+
+Sprint 2 casi completo - Falta ejecutar SQL en Supabase
+```
 
 ---
 
@@ -40,14 +61,58 @@ Sprint 1 COMPLETADO exitosamente! 🎉
 
 ---
 
-## ✅ Completado (Backend + Infraestructura)
+## ✅ Completado (Backend + Infraestructura + Auth)
+
+### 🔐 Autenticación (Sprint 2 - Nuevo)
+- ✅ AuthContext con React Context API
+- ✅ signIn, signUp, signOut implementados
+- ✅ AuthProvider integrado en root.tsx
+- ✅ QueryClientProvider configurado
+- ✅ useAuth hook para acceder al usuario
+- ✅ Sesión persistente con Supabase Auth
+- ✅ Loading states durante auth
+- ✅ Error handling en login/register
+
+### 📄 Páginas de Autenticación (Sprint 2 - Nuevo)
+- ✅ `/login` - Página de inicio de sesión
+  - Form con email y password
+  - Toggle show/hide password
+  - Link a registro
+  - Manejo de errores con toast
+  - Redirect después de login exitoso
+- ✅ `/register` - Página de registro
+  - Form con email, password y nombre completo
+  - Validación de campos
+  - Creación automática de perfil en tabla users
+  - Auto-login después de registro
+
+### 🛡️ Protección de Rutas (Sprint 2 - Nuevo)
+- ✅ ProtectedRoute component
+- ✅ Redirect a /login si no hay sesión
+- ✅ Loading spinner durante verificación
+- ✅ Wrapper reutilizable para rutas privadas
+
+### 🎨 Componentes UI (Sprint 2 - Nuevo)
+- ✅ RecipeDetail component completo
+  - Vista full de receta con imagen
+  - Ingredientes con cantidades
+  - Instrucciones numeradas
+  - Metadata (tiempo, porciones, dificultad)
+  - Botones de acción (Editar, Eliminar, Compartir)
+  - Confirmación de eliminación
+  - Web Share API integration
+- ✅ Header actualizado
+  - Avatar de usuario con inicial
+  - Dropdown menu con email
+  - Botón de logout
+  - Manejo de sesión
 
 ### 🏗️ Configuración Base
 - ✅ TypeScript configurado con `allowJs: true` para coexistencia .jsx/.tsx
 - ✅ React Router 7.9+ con App Router
 - ✅ Vite 6.4+ como bundler
 - ✅ Tailwind CSS 3.4+ configurado
-- ✅ Git + GitHub sincronizado (6+ commits)
+- ✅ Git + GitHub sincronizado (8+ commits)
 - ✅ Variables de entorno con prefijo `VITE_`
 - ✅ .gitignore configurado para proteger credenciales
 

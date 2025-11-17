@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Search, Bell, Plus, Menu } from "lucide-react";
+import { Search, Bell, Plus, Menu, LogOut, User } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 export default function Header({
   onMenuClick,
@@ -8,6 +11,15 @@ export default function Header({
 }) {
   const [searchValue, setSearchValue] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    toast.success("Sesión cerrada exitosamente");
+    navigate("/login");
+  };
 
   return (
     <div className="h-16 bg-[#F3F3F3] dark:bg-[#1A1A1A] flex items-center justify-between px-4 md:px-6 flex-shrink-0 border-b border-[#E4E4E4] dark:border-[#333333]">
@@ -70,13 +82,50 @@ export default function Header({
           <div className="absolute top-2 right-2 w-2 h-2 bg-[#10b981] rounded-full"></div>
         </button>
 
-        {/* User Avatar */}
+        {/* User Avatar with Dropdown */}
         <div className="relative">
-          <img
-            src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=80"
-            alt="User Avatar"
-            className="w-10 h-10 rounded-full ring-2 ring-white dark:ring-[#333333] transition-all duration-150 hover:ring-[#10b981] dark:hover:ring-[#10b981] cursor-pointer object-cover"
-          />
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="w-10 h-10 rounded-full ring-2 ring-white dark:ring-[#333333] transition-all duration-150 hover:ring-[#10b981] dark:hover:ring-[#10b981] cursor-pointer flex items-center justify-center bg-[#10b981] text-white font-semibold"
+          >
+            {user ? user.email?.[0].toUpperCase() : <User size={20} />}
+          </button>
+
+          {/* Dropdown Menu */}
+          {showUserMenu && (
+            <>
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowUserMenu(false)}
+              />
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#1E1E1E] rounded-xl shadow-lg border border-[#E5E5E5] dark:border-[#333333] z-20 overflow-hidden">
+                {user ? (
+                  <>
+                    <div className="px-4 py-3 border-b border-[#E5E5E5] dark:border-[#333333]">
+                      <p className="text-sm font-semibold text-black dark:text-white font-inter truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-4 py-3 text-left flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-inter text-sm"
+                    >
+                      <LogOut size={16} />
+                      Cerrar Sesión
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => navigate("/login")}
+                    className="w-full px-4 py-3 text-left flex items-center gap-2 text-[#10b981] hover:bg-[#10b981]/10 transition-colors font-inter text-sm"
+                  >
+                    <User size={16} />
+                    Iniciar Sesión
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

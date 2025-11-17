@@ -195,7 +195,7 @@ export default function RecipesPage() {
                   return (
                     <div
                       key={recipe.id}
-                      onClick={() => (window.location.href = `/recipe/${recipe.id}`)}
+                      onClick={() => navigate(`/recipes/${recipe.id}`)}
                       className="bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
                     >
                       {/* Image */}
