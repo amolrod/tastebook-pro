@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'node:fs';
+import { readdirSync, statSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -13,6 +13,7 @@ type Tree = {
 	path: string;
 	children: Tree[];
 	hasPage: boolean;
+	pageExtension?: string;
 	isParam: boolean;
 	paramName: string;
 	isCatchAll: boolean;
@@ -52,9 +53,11 @@ function buildRouteTree(dir: string, basePath = ''): Tree {
 			const childPath = basePath ? `${basePath}/${file}` : file;
 			const childNode = buildRouteTree(filePath, childPath);
 			node.children.push(childNode);
-		} else if (file === 'page.jsx') {
+		} else if (file === 'page.jsx' || file === 'page.tsx') {
 			node.hasPage = true;
-    }
+			node.pageExtension = file.endsWith('.tsx') ? '.tsx' : '.jsx';
+			node.path = basePath;
+		}
 	}
 
 	return node;
@@ -64,8 +67,10 @@ function generateRoutes(node: Tree): RouteConfigEntry[] {
 	const routes: RouteConfigEntry[] = [];
 
 	if (node.hasPage) {
+		// Usar la extensión correcta detectada en buildRouteTree
+		const extension = node.pageExtension || '.jsx';
 		const componentPath =
-			node.path === '' ? `./${node.path}page.jsx` : `./${node.path}/page.jsx`;
+			node.path === '' ? `./page${extension}` : `./${node.path}/page${extension}`;
 
 		if (node.path === '') {
 			routes.push(index(componentPath));
@@ -105,7 +110,7 @@ function generateRoutes(node: Tree): RouteConfigEntry[] {
 	return routes;
 }
 if (import.meta.env.DEV) {
-	import.meta.glob('./**/page.jsx', {});
+	import.meta.glob('./**/page.{jsx,tsx}', {}); // Buscar ambos tipos
 	if (import.meta.hot) {
 		import.meta.hot.accept((newSelf) => {
 			import.meta.hot?.invalidate();

@@ -67,22 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (authError) return { error: authError };
       if (!authData.user) return { error: new Error('No se pudo crear el usuario') };
 
-      // 2. Crear registro en tabla users
+            // 2. Crear registro en tabla users
       const { error: profileError } = await supabase
         .from('users')
-        .insert([
-          {
-            id: authData.user.id,
-            email: authData.user.email!,
-            full_name: fullName,
-            preferences: {},
-            stats: {
-              recipes_created: 0,
-              recipes_favorited: 0,
-              meal_plans_created: 0,
-            },
-          },
-        ]);
+        .insert([{
+          id: authData.user.id,
+          email: authData.user.email!,
+          full_name: fullName,
+        }]);
 
       if (profileError) {
         console.error('Error creating user profile:', profileError);
