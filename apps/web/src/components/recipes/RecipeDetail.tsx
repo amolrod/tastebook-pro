@@ -350,13 +350,13 @@ export function RecipeDetail() {
               </h2>
             </div>
             <ol className="space-y-4">
-              {recipe.steps?.map((step, index) => (
+              {recipe.instructions?.map((instruction, index) => (
                 <li key={index} className="flex gap-4">
                   <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-[#10b981] to-[#059669] text-white rounded-full flex items-center justify-center font-bold font-sora">
                     {index + 1}
                   </div>
                   <p className="text-gray-700 dark:text-gray-300 font-inter leading-relaxed pt-2">
-                    {step}
+                    {instruction}
                   </p>
                 </li>
               ))}
