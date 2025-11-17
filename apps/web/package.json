@@ -36,6 +36,7 @@
 		"color2k": "^2.0.3",
 		"date-fns": "^4.1.0",
 		"downshift": "^9.0.9",
+		"framer-motion": "^12.23.24",
 		"hono": "^4.10.6",
 		"isbot": "^5.1.27",
 		"lodash": "^4.17.21",
