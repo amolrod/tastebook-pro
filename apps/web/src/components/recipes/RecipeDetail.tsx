@@ -222,103 +222,84 @@ export function RecipeDetail() {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          
-          <button
-            onClick={() => navigate(`/recipes/${id}/edit`)}
-            className="p-2 rounded-lg border border-[#E6E6E6] dark:border-[#333333] hover:bg-gray-50 dark:hover:bg-[#2A2A2A] transition-colors"
-            title="Editar"
+        {/* Meta Cards Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white dark:bg-[#1E1E1E] rounded-xl p-6 text-center shadow-lg"
           >
-            <Edit size={20} className="text-gray-600 dark:text-gray-400" />
-          </button>
+            <Clock className="w-8 h-8 text-[#10b981] mx-auto mb-3" />
+            <p className="text-3xl font-bold text-black dark:text-white mb-1 font-sora">
+              {totalTime}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">minutos</p>
+          </motion.div>
 
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 rounded-lg border border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            title="Eliminar"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white dark:bg-[#1E1E1E] rounded-xl p-6 text-center shadow-lg"
           >
-            <Trash2 size={20} className="text-red-500" />
-          </button>
-        </div>
-      </div>
+            <Users className="w-8 h-8 text-[#10b981] mx-auto mb-3" />
+            <p className="text-3xl font-bold text-black dark:text-white mb-1 font-sora">
+              {recipe.servings}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">porciones</p>
+          </motion.div>
 
-      {/* Imagen principal */}
-      {recipe.image_url && (
-        <div className="w-full h-[400px] rounded-2xl overflow-hidden mb-6">
-          <img
-            src={recipe.image_url}
-            alt={recipe.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white dark:bg-[#1E1E1E] rounded-xl p-6 text-center shadow-lg"
+          >
+            <Flame className="w-8 h-8 text-orange-500 mx-auto mb-3" />
+            <p className="text-3xl font-bold text-black dark:text-white mb-1 font-sora">
+              {recipe.difficulty ? DIFFICULTY_LABELS[recipe.difficulty] : 'N/A'}
+            </p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">dificultad</p>
+          </motion.div>
 
-      {/* Título y metadata */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-black dark:text-white mb-4 font-sora">
-          {recipe.title}
-        </h1>
-
-        {recipe.description && (
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6 font-inter">
-            {recipe.description}
-          </p>
-        )}
-
-        {/* Badges y stats */}
-        <div className="flex flex-wrap items-center gap-4 mb-6">
-          {recipe.difficulty && (
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${DIFFICULTY_COLORS[recipe.difficulty]}`}>
-              <ChefHat size={14} className="inline mr-1" />
-              {DIFFICULTY_LABELS[recipe.difficulty]}
-            </span>
+          {recipe.calories && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-[#1E1E1E] rounded-xl p-6 text-center shadow-lg"
+            >
+              <Flame className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+              <p className="text-3xl font-bold text-black dark:text-white mb-1 font-sora">
+                {recipe.calories}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">calorías</p>
+            </motion.div>
           )}
-
-          {!recipe.is_public && (
-            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
-              🔒 Privada
-            </span>
-          )}
-        </div>
-
-        {/* Info grid */}
-        <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-[#1E1E1E] rounded-xl">
-          {recipe.prep_time && (
-            <div className="text-center">
-              <Clock size={20} className="mx-auto mb-1 text-[#10b981]" />
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">Preparación</p>
-              <p className="font-semibold text-black dark:text-white font-inter">{recipe.prep_time} min</p>
-            </div>
-          )}
-
-          {recipe.cook_time && (
-            <div className="text-center">
-              <Clock size={20} className="mx-auto mb-1 text-[#10b981]" />
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">Cocción</p>
-              <p className="font-semibold text-black dark:text-white font-inter">{recipe.cook_time} min</p>
-            </div>
-          )}
-
-          <div className="text-center">
-            <Users size={20} className="mx-auto mb-1 text-[#10b981]" />
-            <p className="text-sm text-gray-600 dark:text-gray-400 font-inter">Porciones</p>
-            <p className="font-semibold text-black dark:text-white font-inter">{recipe.servings}</p>
-          </div>
         </div>
 
         {/* Tags */}
         {recipe.tags && recipe.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex flex-wrap gap-2 mb-8"
+          >
             {recipe.tags.map((tag) => (
               <span
                 key={tag}
-                className="px-3 py-1 rounded-full text-sm bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] text-gray-700 dark:text-gray-300 font-inter"
+                className="px-4 py-2 rounded-full text-sm bg-[#10b981]/10 text-[#10b981] font-semibold font-inter"
               >
                 #{tag}
               </span>
             ))}
-          </div>
+          </motion.div>
         )}
-      </div>
+
+        {/* Ingredients and Instructions Grid */}
+        <div className="grid lg:grid-cols-2 gap-8">
 
           {/* Ingredients */}
           <motion.div
