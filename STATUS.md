@@ -1,7 +1,30 @@
 # 📊 Estado Actual del Proyecto - Tastebook Pro
 
-**Última actualización:** 17 Nov 2025 - Sprint 3 COMPLETADO 🎉  
-**Progreso global:** Sprint 1: 100% | Sprint 2: 100% | Sprint 3: 100%
+**Última actualización:** 17 Nov 2025 - Sprint 4 INICIADO 🚀  
+**Progreso global:** Sprint 1: 100% | Sprint 2: 100% | Sprint 3: 100% | Sprint 4: 0%
+
+---
+
+## 🚀 Estado del Sprint 4
+
+```
+Sprint 4: Sistema de Favoritos
+├── [⏳] Tabla favorites en Supabase                   0%
+├── [⏳] RLS policies para favorites                   0%
+├── [⏳] useFavorites hook                             0%
+├── [⏳] useToggleFavorite hook                        0%
+├── [⏳] Botón de favorito en RecipeCard               0%
+├── [⏳] Botón de favorito en RecipeDetail             0%
+├── [⏳] Página /favorites con grid                    0%
+├── [⏳] Contador de favoritos en stats                0%
+├── [⏳] Animación corazón (framer-motion)             0%
+├── [⏳] Optimistic updates                            0%
+└── [⏳] Documentación                                 0%
+
+Progreso total: 0% 🆕
+
+Sprint 4 iniciado - Sistema de favoritos
+```
 
 ---
 
