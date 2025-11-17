@@ -184,7 +184,68 @@ CREATE POLICY "Users can delete own recipes"
 
 ---
 
-### 3. meal_plans
+### 3. favorites
+
+Tabla de recetas favoritas de los usuarios (Sprint 4).
+
+```sql
+CREATE TABLE IF NOT EXISTS favorites (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Constraint para evitar duplicados
+  UNIQUE(user_id, recipe_id)
+);
+
+-- Índices
+CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_recipe_id ON favorites(recipe_id);
+CREATE INDEX IF NOT EXISTS idx_favorites_created_at ON favorites(created_at DESC);
+
+-- Comentarios
+COMMENT ON TABLE favorites IS 'Recetas favoritas de los usuarios';
+COMMENT ON COLUMN favorites.user_id IS 'Usuario que agregó el favorito';
+COMMENT ON COLUMN favorites.recipe_id IS 'Receta marcada como favorita';
+
+-- RLS Policies
+ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+
+-- SELECT: Ver solo propios favoritos
+CREATE POLICY "Users can view own favorites"
+ON favorites FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+-- INSERT: Agregar solo propios favoritos
+CREATE POLICY "Users can insert own favorites"
+ON favorites FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+-- DELETE: Eliminar solo propios favoritos
+CREATE POLICY "Users can delete own favorites"
+ON favorites FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
+```
+
+**Campos:**
+- `id`: UUID único generado automáticamente
+- `user_id`: Referencia al usuario (auth.users)
+- `recipe_id`: Referencia a la receta favorita
+- `created_at`: Timestamp de cuando se agregó
+
+**Características:**
+- ✅ Constraint UNIQUE(user_id, recipe_id) previene duplicados
+- ✅ CASCADE DELETE: Si se elimina usuario o receta, se eliminan favoritos
+- ✅ RLS: Cada usuario solo ve/modifica sus favoritos
+- ✅ Índices optimizados para queries rápidas
+
+---
+
+### 4. meal_plans
 
 Planificador semanal de comidas.
 
@@ -230,7 +291,7 @@ CREATE POLICY "Users can manage own meal plans"
 
 ---
 
-### 4. shopping_lists
+### 5. shopping_lists
 
 Lista de compra generada automáticamente desde meal plans.
 
@@ -300,7 +361,7 @@ CREATE TRIGGER shopping_list_update_trigger
 
 ---
 
-### 5. collections
+### 6. collections
 
 Colecciones personalizadas de recetas (favoritos, para probar, etc.).
 
@@ -349,7 +410,7 @@ CREATE POLICY "Users can manage own collection recipes"
 
 ---
 
-### 6. reviews
+### 7. reviews
 
 Sistema de reviews y ratings de recetas.
 
@@ -424,7 +485,7 @@ CREATE TRIGGER review_rating_trigger
 
 ---
 
-### 7. achievements
+### 9. user_achievements
 
 Sistema de logros y gamificación.
 
