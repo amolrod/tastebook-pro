@@ -36,12 +36,27 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 export const links = () => [];
 
-// Crear QueryClient para React Query
+// Crear QueryClient para React Query con configuración optimizada
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Cache más largo para reducir re-fetches
       staleTime: 1000 * 60 * 5, // 5 minutos
+      gcTime: 1000 * 60 * 10, // 10 minutos (antes cacheTime)
+      // Desactivar refetch automático en focus para mejor performance
       refetchOnWindowFocus: false,
+      // Desactivar refetch en mount si los datos son recientes
+      refetchOnMount: false,
+      // Desactivar refetch en reconexión (WiFi/3G)
+      refetchOnReconnect: false,
+      // Retry solo 1 vez en caso de error (reduce carga)
+      retry: 1,
+      // Tiempo de retry más largo
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+    mutations: {
+      // Retry de mutaciones
+      retry: 1,
     },
   },
 });

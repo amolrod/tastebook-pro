@@ -88,5 +88,42 @@ export default defineConfig({
     warmup: {
       clientFiles: ['./src/app/**/*', './src/app/root.tsx', './src/app/routes.ts'],
     },
+    watch: {
+      // Excluir directorios que no necesitan vigilancia
+      ignored: [
+        '**/node_modules/**',
+        '**/.git/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/.next/**',
+        '**/coverage/**',
+        '**/__tests__/**',
+        '**/docs/**',
+        '**/scripts/**',
+        // Excluir la app móvil para reducir carga
+        '**/apps/mobile/**',
+      ],
+      // Usar polling solo si es necesario (desactivado por defecto)
+      usePolling: false,
+      // Intervalo más largo para reducir CPU
+      interval: 100,
+    },
+  },
+  // Optimizaciones de build
+  build: {
+    // Usar esbuild para transpilación más rápida
+    target: 'esnext',
+    // Reducir tamaño de chunks
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        // Mejor code splitting
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router'],
+          'ui-vendor': ['framer-motion', 'lucide-react'],
+          'data-vendor': ['@tanstack/react-query', '@supabase/supabase-js'],
+        },
+      },
+    },
   },
 });
