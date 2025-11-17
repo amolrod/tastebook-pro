@@ -22,21 +22,48 @@ export function useUploadAvatar() {
         throw new Error('El archivo debe ser una imagen');
       }
 
-      // TEMPORALMENTE: Convertir imagen a base64 y guardar en la BD
-      // TODO: Cuando se configure Storage en Supabase, cambiar a usar bucket
-      const reader = new FileReader();
-      const base64Promise = new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      // Generar nombre único
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
 
-      const base64Image = await base64Promise;
+      // Eliminar avatar anterior si existe
+      const { data: profile } = await supabase
+        .from('users')
+        .select('avatar_url')
+        .eq('id', userId)
+        .single();
 
-      // Actualizar usuario con base64
+      if (profile?.avatar_url && profile.avatar_url.includes('supabase.co/storage')) {
+        // Extraer nombre del archivo de la URL de storage
+        const urlParts = profile.avatar_url.split('/');
+        const oldFileName = urlParts[urlParts.length - 1];
+        if (oldFileName && oldFileName.includes(userId)) {
+          await supabase.storage.from('avatars').remove([oldFileName]);
+        }
+      }
+
+      // Subir nueva imagen al bucket 'avatars'
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      // Obtener URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      // Actualizar usuario
       const { error: updateError } = await supabase
         .from('users')
-        .update({ avatar_url: base64Image })
+        .update({ avatar_url: publicUrl })
         .eq('id', userId);
 
       if (updateError) {
@@ -44,7 +71,7 @@ export function useUploadAvatar() {
         throw updateError;
       }
 
-      return base64Image;
+      return publicUrl;
     },
     onSuccess: () => {
       toast.success('Avatar actualizado correctamente');

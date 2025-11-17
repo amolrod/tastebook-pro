@@ -1,12 +1,19 @@
 # 🗄️ Configuración de Supabase Storage para Avatares
 
-**Estado Actual:** El sistema usa **base64** temporalmente para guardar avatares directamente en la base de datos. Esto funciona pero no es óptimo para producción.
+**Estado Actual:** ✅ **Storage configurado y funcionando** - El sistema usa Supabase Storage con el bucket `avatars`.
 
 ---
 
-## ⚠️ Configuración REQUERIDA para usar Storage
+## ✅ Configuración Completada
 
-Para usar Supabase Storage en lugar de base64, sigue estos pasos:
+El bucket `avatars` está configurado con las siguientes políticas RLS:
+
+1. ✅ **Anyone can view avatars** - Lectura pública (SELECT)
+2. ✅ **Authenticated users can upload avatars** - Upload autenticado (INSERT)
+3. ✅ **Users can update own avatar** - Update propio (UPDATE)
+4. ✅ **Users can delete own avatar** - Delete propio (DELETE)
+
+---
 
 ### 1. Crear Bucket en Supabase
 
