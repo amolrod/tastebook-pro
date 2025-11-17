@@ -107,6 +107,16 @@ export default function Header({
                       </p>
                     </div>
                     <button
+                      onClick={() => {
+                        navigate("/profile");
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left flex items-center gap-2 text-[#4B4B4B] dark:text-[#B0B0B0] hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-colors font-inter text-sm"
+                    >
+                      <User size={16} />
+                      Mi Perfil
+                    </button>
+                    <button
                       onClick={handleLogout}
                       className="w-full px-4 py-3 text-left flex items-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-inter text-sm"
                     >
