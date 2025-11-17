@@ -3,23 +3,53 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useRecipes } from '../../hooks/useRecipes';
+import { useAuth } from '../../contexts/AuthContext';
+import { useIsFavorite } from '../../hooks/useIsFavorite';
+import { useToggleFavorite } from '../../hooks/useToggleFavorite';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
-import { Filter, Grid3x3, List, Search, Clock, Users, Star, Plus } from 'lucide-react';
+import { Filter, Grid3x3, List, Search, Clock, Users, Star, Plus, Heart } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function RecipesPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [filterOpen, setFilterOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Filtros avanzados
+  const [difficultyFilter, setDifficultyFilter] = useState('');
+  const [maxTimeFilter, setMaxTimeFilter] = useState('');
+  const [servingsFilter, setServingsFilter] = useState('');
+
   // Usar nuestro hook useRecipes
-  const { data: recipes, isLoading, error, refetch } = useRecipes(
-    { search: searchQuery },
+  const { data: allRecipes, isLoading, error, refetch } = useRecipes(
+    {},
     'created_at',
     'desc'
   );
+
+  // Filtrado local en tiempo real
+  const recipes = allRecipes?.filter((recipe) => {
+    // Búsqueda por título o descripción (case insensitive)
+    const matchesSearch = !searchQuery || 
+      recipe.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filtro de dificultad
+    const matchesDifficulty = !difficultyFilter || recipe.difficulty === difficultyFilter;
+    
+    // Filtro de tiempo máximo
+    const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+    const matchesTime = !maxTimeFilter || totalTime <= parseInt(maxTimeFilter);
+    
+    // Filtro de porciones
+    const matchesServings = !servingsFilter || recipe.servings >= parseInt(servingsFilter);
+    
+    return matchesSearch && matchesDifficulty && matchesTime && matchesServings;
+  });
 
   // Debug: Log para ver el estado
   useEffect(() => {
@@ -60,6 +90,85 @@ export default function RecipesPage() {
         />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
+          {/* Advanced Filters Panel */}
+          {filterOpen && (
+            <div className="mb-6 bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-xl p-4">
+              <h3 className="text-lg font-bold text-black dark:text-white mb-4 font-sora">Filtros Avanzados</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Dificultad */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 font-inter">
+                    Dificultad
+                  </label>
+                  <select
+                    value={difficultyFilter}
+                    onChange={(e) => setDifficultyFilter(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#262626] border border-[#E6E6E6] dark:border-[#404040] rounded-lg text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                  >
+                    <option value="">Todas</option>
+                    <option value="facil">Fácil</option>
+                    <option value="media">Media</option>
+                    <option value="dificil">Difícil</option>
+                  </select>
+                </div>
+
+                {/* Tiempo máximo */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 font-inter">
+                    Tiempo máximo
+                  </label>
+                  <select
+                    value={maxTimeFilter}
+                    onChange={(e) => setMaxTimeFilter(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#262626] border border-[#E6E6E6] dark:border-[#404040] rounded-lg text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                  >
+                    <option value="">Sin límite</option>
+                    <option value="15">15 minutos</option>
+                    <option value="30">30 minutos</option>
+                    <option value="45">45 minutos</option>
+                    <option value="60">1 hora</option>
+                    <option value="90">1.5 horas</option>
+                    <option value="120">2 horas</option>
+                  </select>
+                </div>
+
+                {/* Porciones mínimas */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 font-inter">
+                    Porciones mínimas
+                  </label>
+                  <select
+                    value={servingsFilter}
+                    onChange={(e) => setServingsFilter(e.target.value)}
+                    className="w-full px-3 py-2 bg-white dark:bg-[#262626] border border-[#E6E6E6] dark:border-[#404040] rounded-lg text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                  >
+                    <option value="">Todas</option>
+                    <option value="1">1+</option>
+                    <option value="2">2+</option>
+                    <option value="4">4+</option>
+                    <option value="6">6+</option>
+                    <option value="8">8+</option>
+                  </select>
+                </div>
+
+                {/* Botón limpiar filtros */}
+                <div className="flex items-end">
+                  <button
+                    onClick={() => {
+                      setDifficultyFilter('');
+                      setMaxTimeFilter('');
+                      setServingsFilter('');
+                      setSearchQuery('');
+                    }}
+                    className="w-full px-4 py-2 bg-gray-100 dark:bg-[#262626] border border-[#E6E6E6] dark:border-[#404040] text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-[#333333] transition-all font-inter font-semibold"
+                  >
+                    Limpiar filtros
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Filters and View Controls */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
             {/* Search Bar */}
@@ -193,85 +302,14 @@ export default function RecipesPage() {
                   };
 
                   return (
-                    <div
+                    <RecipeCardWithFavorite 
                       key={recipe.id}
-                      onClick={() => navigate(`/recipes/${recipe.id}`)}
-                      className="bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
-                    >
-                      {/* Image */}
-                      <div className="relative h-48 overflow-hidden bg-[#F8F8F8] dark:bg-[#262626]">
-                        {recipe.image_url ? (
-                          <img
-                            src={recipe.image_url}
-                            alt={recipe.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            <span className="text-6xl">🍽️</span>
-                          </div>
-                        )}
-                        
-                        {/* Rating Badge */}
-                        {recipe.rating_avg && (
-                          <div className="absolute top-3 right-3 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md border border-[#E6E6E6] dark:border-[#404040]">
-                            <Star className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
-                            <span className="text-sm font-semibold text-black dark:text-white font-inter">
-                              {recipe.rating_avg.toFixed(1)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4">
-                        {/* Title */}
-                        <h3 className="font-bold text-black dark:text-white mb-2 line-clamp-2 group-hover:text-[#10b981] transition-colors font-sora text-lg">
-                          {recipe.title}
-                        </h3>
-
-                        {/* Description */}
-                        {recipe.description && (
-                          <p className="text-sm text-[#6E6E6E] dark:text-[#AAAAAA] mb-3 line-clamp-2 font-inter">
-                            {recipe.description}
-                          </p>
-                        )}
-
-                        {/* Meta Info */}
-                        <div className="flex items-center gap-4 mb-3 text-sm text-[#6E6E6E] dark:text-[#AAAAAA] font-inter">
-                          {totalTime > 0 && (
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              <span>{totalTime} min</span>
-                            </div>
-                          )}
-                          
-                          {recipe.servings && (
-                            <div className="flex items-center gap-1">
-                              <Users className="w-4 h-4" />
-                              <span>{recipe.servings}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Difficulty Badge */}
-                        {recipe.difficulty && (
-                          <div className="inline-flex items-center gap-2">
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold font-inter ${
-                                recipe.difficulty === 'facil'
-                                  ? 'bg-[#dcfce7] text-[#16a34a]'
-                                  : recipe.difficulty === 'media'
-                                  ? 'bg-[#fef3c7] text-[#d97706]'
-                                  : 'bg-[#fee2e2] text-[#dc2626]'
-                              }`}
-                            >
-                              {difficultyLabels[recipe.difficulty] || recipe.difficulty}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                      recipe={recipe}
+                      totalTime={totalTime}
+                      difficultyLabels={difficultyLabels}
+                      user={user}
+                      onNavigate={() => navigate(`/recipes/${recipe.id}`)}
+                    />
                   );
                 })}
               </div>
@@ -288,6 +326,131 @@ export default function RecipesPage() {
       >
         <Plus className="w-7 h-7 md:w-8 md:h-8 text-white group-hover:rotate-90 transition-transform duration-300" />
       </button>
+    </div>
+  );
+}
+
+// Componente de tarjeta con bot\u00f3n de favorito
+function RecipeCardWithFavorite({ recipe, totalTime, difficultyLabels, user, onNavigate }) {
+  const { data: isFavorite = false, isLoading: isFavoriteLoading } = useIsFavorite(user?.id, recipe.id);
+  const toggleFavorite = useToggleFavorite();
+
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error('Debes iniciar sesi\u00f3n para guardar favoritos');
+      return;
+    }
+    
+    toggleFavorite.mutate({
+      userId: user.id,
+      recipeId: recipe.id,
+      isFavorite,
+    });
+  };
+
+  return (
+    <div
+      onClick={onNavigate}
+      className="bg-white dark:bg-[#1E1E1E] border border-[#E6E6E6] dark:border-[#333333] rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer group"
+    >
+      {/* Image */}
+      <div className="relative h-48 overflow-hidden bg-[#F8F8F8] dark:bg-[#262626]">
+        {recipe.image_url ? (
+          <img
+            src={recipe.image_url}
+            alt={recipe.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <span className="text-6xl">Plato de comida</span>
+          </div>
+        )}
+        
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavoriteClick}
+          disabled={toggleFavorite.isPending || isFavoriteLoading}
+          className={`absolute top-3 right-3 p-2.5 rounded-full shadow-lg backdrop-blur-md transition-all ${
+            isFavorite 
+              ? 'bg-red-500/90 hover:bg-red-600' 
+              : 'bg-white/90 dark:bg-[#1A1A1A]/90 hover:bg-white'
+          } ${toggleFavorite.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {toggleFavorite.isPending || isFavoriteLoading ? (
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Heart 
+              className={`w-5 h-5 transition-all ${
+                isFavorite 
+                  ? 'fill-white text-white scale-110' 
+                  : 'text-red-500 hover:scale-110'
+              }`} 
+            />
+          )}
+        </button>
+        
+        {/* Rating Badge */}
+        {recipe.rating_avg && (
+          <div className="absolute top-3 left-3 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md border border-[#E6E6E6] dark:border-[#404040]">
+            <Star className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
+            <span className="text-sm font-semibold text-black dark:text-white font-inter">
+              {recipe.rating_avg.toFixed(1)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {/* Title */}
+        <h3 className="font-bold text-black dark:text-white mb-2 line-clamp-2 group-hover:text-[#10b981] transition-colors font-sora text-lg">
+          {recipe.title}
+        </h3>
+
+        {/* Description */}
+        {recipe.description && (
+          <p className="text-sm text-[#6E6E6E] dark:text-[#AAAAAA] mb-3 line-clamp-2 font-inter">
+            {recipe.description}
+          </p>
+        )}
+
+        {/* Meta Info */}
+        <div className="flex items-center gap-4 mb-3 text-sm text-[#6E6E6E] dark:text-[#AAAAAA] font-inter">
+          {totalTime > 0 && (
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              <span>{totalTime} min</span>
+            </div>
+          )}
+          
+          {recipe.servings && (
+            <div className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              <span>{recipe.servings}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Difficulty Badge */}
+        {recipe.difficulty && (
+          <div className="inline-flex items-center gap-2">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold font-inter ${
+                recipe.difficulty === 'facil'
+                  ? 'bg-[#dcfce7] text-[#16a34a]'
+                  : recipe.difficulty === 'media'
+                  ? 'bg-[#fef3c7] text-[#d97706]'
+                  : 'bg-[#fee2e2] text-[#dc2626]'
+              }`}
+            >
+              {difficultyLabels[recipe.difficulty] || recipe.difficulty}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
