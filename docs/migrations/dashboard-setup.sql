@@ -85,6 +85,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 4. Función para verificar y desbloquear achievements automáticamente
+-- Primero hacer DROP si existe con signature antigua
+DROP FUNCTION IF EXISTS check_and_unlock_achievements(uuid);
+
 CREATE OR REPLACE FUNCTION check_and_unlock_achievements(p_user_id UUID)
 RETURNS TABLE(achievement_code TEXT, achievement_name TEXT, just_unlocked BOOLEAN) AS $$
 DECLARE
