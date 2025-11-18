@@ -4,13 +4,13 @@ Planificación detallada del desarrollo por sprints con tareas específicas y ch
 
 ## Estado Actual
 
-**Sprint:** 1 - Setup Inicial  
-**Última actualización:** 15 Nov 2025  
-**Progreso general:** 15%
+**Sprint:** 4 - Planificador Semanal Completo  
+**Última actualización:** 18 Nov 2025  
+**Progreso general:** 45%
 
 ---
 
-## Sprint 1 - Conectividad Backend (Semana 1)
+## Sprint 1 - Conectividad Backend (Semana 1) ✅ COMPLETADO
 
 **Objetivo:** Configurar infraestructura base y conectar Supabase con CRUD completo de recetas.
 
@@ -19,85 +19,127 @@ Planificación detallada del desarrollo por sprints con tareas específicas y ch
 - [x] Configurar TypeScript con soporte .jsx y .tsx
 - [x] Instalar dependencias: @supabase/supabase-js, zod, react-query
 - [x] Crear documentación inicial (README, CHANGELOG, docs/)
-
-### ⏳ En Progreso
-
-- [ ] Configurar cliente Supabase en `/src/lib/supabase.ts`
-- [ ] Crear custom hooks en `/src/hooks/`:
-  - [ ] `useRecipes()` - CRUD completo con React Query
-  - [ ] `useAuth()` - wrapper Supabase Auth
-  - [ ] `useMealPlan()` - gestión plan semanal
-  - [ ] `useShoppingList()` - sincronización tiempo real
-- [ ] Implementar RecipeService en `/src/lib/api/recipes.ts`
-- [ ] Conectar Biblioteca de Recetas con datos reales
-- [ ] Eliminar datos mock/hardcodeados
-
-### Checkpoint Sprint 1
-```bash
-git add .
-git commit -m "feat(backend): connect Supabase and implement recipe CRUD"
-git push origin main
-```
+- [x] Configurar cliente Supabase en `/src/lib/supabase.ts`
+- [x] Crear custom hooks en `/src/hooks/`:
+  - [x] `useRecipes()` - CRUD completo con React Query
+  - [x] `useAuth()` - wrapper Supabase Auth
+  - [x] `useMealPlans()` - gestión plan semanal
+  - [x] `useFavorites()` - sistema de favoritos
+- [x] Implementar RecipeService en `/src/lib/api/recipes.ts`
+- [x] Conectar Biblioteca de Recetas con datos reales
+- [x] Eliminar datos mock/hardcodeados
 
 ---
 
-## Sprint 2 - Editor de Recetas (Semana 1-2)
+## Sprint 2 - Editor de Recetas (Semana 1-2) ✅ COMPLETADO
 
 **Objetivo:** Crear editor completo de recetas con validación y subida de imágenes.
 
-### Tareas
+### ✅ Completado
 
-- [ ] Crear esquema Zod de validación en `/src/lib/validations/recipe.ts`
-- [ ] Crear RecipeEditor component en `/src/components/recipes/RecipeEditor.tsx`
-  - [ ] Formulario con react-hook-form + zod
-  - [ ] Campo título (min 3, max 100 caracteres)
-  - [ ] Ingredientes: array dinámico con nombre, cantidad, unidad, categoría
-  - [ ] Pasos: array dinámico de strings numerados automáticamente
-  - [ ] Campos: tiempo prep, tiempo cocción, porciones, dificultad
-  - [ ] Tags: multi-select con sugerencias
-  - [ ] Subida de imagen con preview
-  - [ ] Compresión automática de imágenes (max 800x800px, 80% quality)
-  - [ ] Botones: Guardar como privado, Guardar como público, Cancelar
-- [ ] Crear componente IngredientInput con autocompletado
-- [ ] Crear componente StepInput con drag & drop para reordenar
-- [ ] Crear ruta `/recipe/new` para crear recetas
-- [ ] Crear ruta `/recipe/[id]/edit` para editar recetas
-- [ ] Implementar `uploadRecipeImage()` en RecipeService
-- [ ] Añadir loading states y error handling
-- [ ] Añadir confirmación al cancelar con cambios sin guardar
-
-### Checkpoint Sprint 2
-```bash
-git add .
-git commit -m "feat(recipes): add full recipe editor with image upload and validation"
-git push origin main
-```
+- [x] Crear esquema Zod de validación en `/src/lib/validations/recipe.ts`
+- [x] Crear RecipeEditor component en `/src/components/recipes/RecipeEditor.tsx`
+- [x] Formulario con react-hook-form + zod
+- [x] Ingredientes: array dinámico con nombre, cantidad, unidad
+- [x] Pasos: array dinámico de strings numerados automáticamente
+- [x] Campos: tiempo prep, tiempo cocción, porciones, dificultad
+- [x] Tags: multi-select con sugerencias
+- [x] Subida de imagen con preview y validación
+- [x] Crear ruta `/recipes/new` para crear recetas
+- [x] Crear ruta `/recipes/[id]/edit` para editar recetas
+- [x] Implementar `uploadRecipeImage()` en RecipeService
+- [x] Loading states y error handling completo
+- [x] Storage configurado en Supabase
 
 ---
 
-## Sprint 3 - Planificador Funcional (Semana 2)
+## Sprint 3 - Detalle y Favoritos (Semana 2) ✅ COMPLETADO
 
-**Objetivo:** Implementar planificador semanal con drag & drop y lista de compra inteligente.
+**Objetivo:** Implementar vista detallada de recetas y sistema de favoritos.
 
-### Tareas
+### ✅ Completado
 
-#### Planificador Semanal
-- [ ] Instalar y configurar @dnd-kit/core
-- [ ] Crear componente WeeklyPlanner en `/src/components/planner/WeeklyPlanner.tsx`
-- [ ] Crear componente DayColumn con 4 slots (desayuno/comida/cena/snack)
-- [ ] Implementar RecipeSidebar con lista arrastrable de recetas
-- [ ] Implementar drag & drop:
-  - [ ] Arrastrar desde sidebar a calendario
-  - [ ] Arrastrar dentro del calendario para mover
-  - [ ] Arrastrar fuera para eliminar
-- [ ] Código de colores por tipo de comida
-- [ ] Persistir cambios en Supabase `meal_plans` tabla
-- [ ] Añadir selector de semana (prev/next)
-- [ ] Mostrar totales: calorías, tiempo de cocción por día
+- [x] Crear componente RecipeDetail con hero image
+- [x] Sistema de favoritos completo
+- [x] Página de favoritos del usuario
+- [x] Búsqueda y filtros en tiempo real
+- [x] Sistema de rating visual
+- [x] Navegación entre recetas
+- [x] Botones de editar/eliminar para propietario
 
-#### Lista de Compra Inteligente
-- [ ] Crear componente ShoppingList en `/src/components/shopping/ShoppingList.tsx`
-- [ ] Implementar lógica de agregación de ingredientes:
+---
+
+## Sprint 4 - Planificador Semanal Completo (Semana 3) ✅ COMPLETADO
+
+**Objetivo:** Implementar planificador semanal funcional con datos reales.
+
+### ✅ Completado
+
+#### Backend & Data Layer
+- [x] Crear `MealPlanService` en `/src/lib/api/meal-plans.ts`
+  - [x] CRUD completo de meal plans
+  - [x] Helpers de fechas (getMonday, formatWeekStart, getWeekRange)
+  - [x] Agregar/eliminar recetas de slots
+  - [x] Auto-creación de planes si no existen
+
+- [x] Crear hooks de React Query en `/src/hooks/useMealPlans.ts`
+  - [x] `useMealPlan(userId, weekStartDate)` - obtener/crear plan
+  - [x] `useUserMealPlans(userId)` - todos los planes del usuario
+  - [x] `useAddRecipeToMealPlan()` - agregar receta
+  - [x] `useRemoveRecipeFromMealPlan()` - eliminar receta
+  - [x] `useUpdateMealPlan()` - actualizar plan completo
+  - [x] Optimistic updates y cache management
+
+#### UI Components
+- [x] Crear `MealSlot.tsx` - slot de comida individual
+  - [x] Estados: vacío, con receta, loading
+  - [x] Botón para agregar receta
+  - [x] Preview con imagen, título, tiempo, porciones
+  - [x] Botón para eliminar (hover)
+  - [x] Badge de tipo de comida con color
+
+- [x] Crear `RecipeSelectorModal.tsx` - modal de selección
+  - [x] Búsqueda en tiempo real
+  - [x] Filtro por dificultad
+  - [x] Selector de porciones
+  - [x] Grid responsive de recetas
+  - [x] Preview con rating, tiempo, porciones
+  - [x] Loading state
+
+#### Main Page
+- [x] Actualizar `/app/planner/page.tsx`
+  - [x] Navegación por semanas (anterior/siguiente/actual)
+  - [x] Cálculo de fechas reales del calendario
+  - [x] Grid 7x4 (días x tipos de comida)
+  - [x] Formato de fechas en español
+  - [x] Número de semana del año
+  - [x] Integración con MealSlot y Modal
+  - [x] Loading y error states
+  - [x] Responsive design (móvil y escritorio)
+
+#### Features Implementadas
+- [x] Usar exclusivamente datos reales de Supabase
+- [x] Navegación entre semanas reales del calendario
+- [x] Agregar recetas propias y públicas sin limitaciones
+- [x] Múltiples comidas por momento del día
+- [x] Fechas coinciden con calendario real
+- [x] Editar y eliminar recetas del plan
+- [x] Visualización clara con sistema de diseño existente
+- [x] Feedback visual (toasts) para acciones
+- [x] Responsividad móvil y escritorio impecable
+
+#### Documentación
+- [x] Crear `docs/PLANNER.md` con documentación completa
+- [x] Actualizar `docs/ROADMAP.md` con progreso
+- [x] Documentar componentes, hooks y servicios
+- [x] Incluir futuras mejoras planificadas
+
+### Checkpoint Sprint 4
+```bash
+git add .
+git commit -m "feat(planner): implement complete weekly meal planner with real data"
+git push origin main
+```
   - [ ] Extraer de todas las recetas del plan semanal
   - [ ] Detectar duplicados por nombre (normalizado)
   - [ ] Sumar cantidades de misma unidad

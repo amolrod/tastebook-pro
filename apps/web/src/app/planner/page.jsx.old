@@ -1,7 +1,16 @@
-import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
-import { Calendar, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+'use client';
+
+import { useState, useMemo } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useMealPlan, useAddRecipeToMealPlan, useRemoveRecipeFromMealPlan } from '../../hooks/useMealPlans';
+import { formatWeekStart, getMonday, getWeekRange } from '../../lib/api/meal-plans';
+import Sidebar from '../../components/Sidebar';
+import Header from '../../components/Header';
+import { MealSlot } from '../../components/planner/MealSlot';
+import { RecipeSelectorModal } from '../../components/planner/RecipeSelectorModal';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { Calendar, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function PlannerPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
