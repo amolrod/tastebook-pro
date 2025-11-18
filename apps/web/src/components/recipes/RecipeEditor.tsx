@@ -163,7 +163,7 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
     if (isEditMode && initialData?.id) {
       // Modo edición
       updateRecipe(
-        { id: initialData.id, updates: cleanedData as any },
+        { id: initialData.id, data: cleanedData as any },
         {
           onSuccess: (updatedRecipe) => {
             console.log('✅ Receta actualizada:', updatedRecipe);
