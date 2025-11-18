@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   useMealPlan,
@@ -13,7 +13,7 @@ import Header from '../../components/Header';
 import { MealSlot } from '../../components/planner/MealSlot';
 import { RecipeSelectorModal } from '../../components/planner/RecipeSelectorModal';
 import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 /**
  * Página principal del planificador semanal
@@ -34,6 +34,21 @@ export default function PlannerPage() {
     mealType: string;
   } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showTip, setShowTip] = useState(false);
+
+  // Verificar si el usuario ya vio el tip
+  useEffect(() => {
+    const tipSeen = localStorage.getItem('planner-tip-seen');
+    if (!tipSeen) {
+      setShowTip(true);
+    }
+  }, []);
+
+  // Función para cerrar el tip permanentemente
+  const dismissTip = () => {
+    localStorage.setItem('planner-tip-seen', 'true');
+    setShowTip(false);
+  };
 
   // Calcular week start date
   const weekStartDate = useMemo(() => formatWeekStart(currentDate), [currentDate]);
@@ -312,13 +327,22 @@ export default function PlannerPage() {
             </div>
           )}
 
-          {/* Info Note */}
-          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-300 font-inter">
-              <strong>Tip:</strong> Haz click en "Agregar receta" para añadir comidas a tu plan
-              semanal. Puedes agregar recetas propias o públicas de otros usuarios.
-            </p>
-          </div>
+          {/* Info Note - Solo se muestra una vez */}
+          {showTip && (
+            <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 relative">
+              <button
+                onClick={dismissTip}
+                className="absolute top-2 right-2 p-1 hover:bg-blue-100 dark:hover:bg-blue-800/30 rounded-full transition-colors"
+                title="Cerrar"
+              >
+                <X size={16} className="text-blue-600 dark:text-blue-400" />
+              </button>
+              <p className="text-sm text-blue-800 dark:text-blue-300 font-inter pr-6">
+                <strong>Tip:</strong> Haz click en "Agregar receta" para añadir comidas a tu plan
+                semanal. Puedes agregar recetas propias o públicas de otros usuarios.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

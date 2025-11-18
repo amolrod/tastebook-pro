@@ -171,21 +171,22 @@ export function RecipeSelectorModal({
                   <option key={tag} value={tag}>{tag}</option>
                 ))}
               </select>
+            </div>
 
-              {/* Selector de porciones */}
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 font-inter">
-                  Porciones:
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="20"
-                  value={selectedServings}
-                  onChange={(e) => setSelectedServings(Number(e.target.value))}
-                  className="w-20 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                />
-              </div>
+            {/* Selector de porciones (fuera de filtros) */}
+            <div className="flex items-center gap-2 pt-2 border-t border-[#E6E6E6] dark:border-[#333333]">
+              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 font-inter">
+                Porciones a preparar:
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="20"
+                value={selectedServings}
+                onChange={(e) => setSelectedServings(Number(e.target.value))}
+                className="w-20 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              />
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-inter">(Aplicará a la receta seleccionada)</span>
             </div>
           </div>
 
