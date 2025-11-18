@@ -118,8 +118,6 @@ export default function PlannerPage() {
   const handleSelectRecipe = async (recipeId: string, servings: number) => {
     if (!mealPlan || !selectedSlot) return;
 
-    console.log('📝 Saving to plan with servings:', servings);
-    
     addRecipeMutation.mutate({
       planId: mealPlan.id,
       currentMeals: mealPlan.meals,
