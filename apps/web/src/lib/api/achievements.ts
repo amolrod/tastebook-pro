@@ -2,10 +2,12 @@ import { supabase } from '../supabase';
 
 export interface Achievement {
   id: string;
+  code: string;
   name: string;
   description: string;
   icon: string;
   tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+  points: number;
   criteria: {
     recipes_created?: number;
     favorites_count?: number;
