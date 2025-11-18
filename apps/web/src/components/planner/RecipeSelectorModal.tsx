@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Search, Clock, Users, Star } from 'lucide-react';
+import { X, Search, Clock, Users, Star, Heart } from 'lucide-react';
 import { useRecipes } from '../../hooks/useRecipes';
+import { useFavorites } from '../../hooks/useFavorites';
+import { useAuth } from '../../contexts/AuthContext';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import type { Recipe } from '../../types/database';
 
@@ -29,11 +31,20 @@ export function RecipeSelectorModal({
   onSelectRecipe,
   title = 'Seleccionar Receta',
 }: RecipeSelectorModalProps) {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedServings, setSelectedServings] = useState(1);
   const [difficultyFilter, setDifficultyFilter] = useState('');
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [timeFilter, setTimeFilter] = useState('');
+  const [tagFilter, setTagFilter] = useState('');
 
   const { data: allRecipes, isLoading } = useRecipes({}, 'created_at', 'desc');
+  const { data: favorites } = useFavorites(user?.id);
+
+  // Obtener todos los tags únicos de las recetas
+  const allTags = [...new Set(allRecipes?.flatMap(recipe => recipe.tags || []) || [])];
+  const favoriteRecipeIds = new Set(favorites?.map(fav => fav.recipe_id) || []);
 
   // Filtrado local
   const recipes = allRecipes?.filter((recipe) => {
@@ -44,7 +55,18 @@ export function RecipeSelectorModal({
 
     const matchesDifficulty = !difficultyFilter || recipe.difficulty === difficultyFilter;
 
-    return matchesSearch && matchesDifficulty;
+    const matchesFavorites = !showOnlyFavorites || favoriteRecipeIds.has(recipe.id);
+
+    const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+    const matchesTime = !timeFilter || 
+      (timeFilter === '15' && totalTime <= 15) ||
+      (timeFilter === '30' && totalTime <= 30) ||
+      (timeFilter === '60' && totalTime <= 60) ||
+      (timeFilter === '60+' && totalTime > 60);
+
+    const matchesTag = !tagFilter || (recipe.tags && recipe.tags.includes(tagFilter));
+
+    return matchesSearch && matchesDifficulty && matchesFavorites && matchesTime && matchesTag;
   });
 
   const handleSelectRecipe = (recipeId: string) => {
@@ -52,6 +74,9 @@ export function RecipeSelectorModal({
     onClose();
     setSearchQuery('');
     setDifficultyFilter('');
+    setShowOnlyFavorites(false);
+    setTimeFilter('');
+    setTagFilter('');
     setSelectedServings(1);
   };
 
@@ -96,11 +121,25 @@ export function RecipeSelectorModal({
               />
             </div>
 
-            <div className="flex gap-4 items-center flex-wrap">
+            <div className="flex gap-3 items-center flex-wrap">
+              {/* Filtro de favoritos */}
+              <button
+                onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+                className={`px-4 py-2 border rounded-lg font-inter text-sm transition-all flex items-center gap-2 ${
+                  showOnlyFavorites
+                    ? 'bg-[#10b981] border-[#10b981] text-white'
+                    : 'border-[#E6E6E6] dark:border-[#333333] bg-white dark:bg-[#262626] text-gray-700 dark:text-gray-300 hover:border-[#10b981]'
+                }`}
+              >
+                <Heart size={16} className={showOnlyFavorites ? 'fill-white' : ''} />
+                Favoritas
+              </button>
+
+              {/* Filtro de dificultad */}
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
               >
                 <option value="">Todas las dificultades</option>
                 <option value="facil">Fácil</option>
@@ -108,6 +147,32 @@ export function RecipeSelectorModal({
                 <option value="dificil">Difícil</option>
               </select>
 
+              {/* Filtro de tiempo */}
+              <select
+                value={timeFilter}
+                onChange={(e) => setTimeFilter(e.target.value)}
+                className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              >
+                <option value="">Cualquier tiempo</option>
+                <option value="15">≤ 15 min</option>
+                <option value="30">≤ 30 min</option>
+                <option value="60">≤ 1 hora</option>
+                <option value="60+">&gt; 1 hora</option>
+              </select>
+
+              {/* Filtro de tags */}
+              <select
+                value={tagFilter}
+                onChange={(e) => setTagFilter(e.target.value)}
+                className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              >
+                <option value="">Todos los tipos</option>
+                {allTags.sort().map(tag => (
+                  <option key={tag} value={tag}>{tag}</option>
+                ))}
+              </select>
+
+              {/* Selector de porciones */}
               <div className="flex items-center gap-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 font-inter">
                   Porciones:
@@ -118,7 +183,7 @@ export function RecipeSelectorModal({
                   max="20"
                   value={selectedServings}
                   onChange={(e) => setSelectedServings(Number(e.target.value))}
-                  className="w-20 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                  className="w-20 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                 />
               </div>
             </div>

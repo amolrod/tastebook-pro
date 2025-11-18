@@ -81,7 +81,7 @@ export function MealSlot({
       </button>
 
       {/* Image */}
-      <div className="relative h-24 overflow-hidden bg-[#F8F8F8] dark:bg-[#262626]">
+      <div className="relative h-20 overflow-hidden bg-[#F8F8F8] dark:bg-[#262626]">
         {recipe.image_url ? (
           <img
             src={recipe.image_url}
@@ -93,32 +93,24 @@ export function MealSlot({
             <span className="text-3xl">🍽️</span>
           </div>
         )}
-
-        {/* Meal type badge */}
-        <div
-          className="absolute bottom-2 left-2 px-2 py-1 rounded-full text-xs font-semibold text-white shadow-md"
-          style={{ backgroundColor: mealColor }}
-        >
-          {mealLabel}
-        </div>
       </div>
 
       {/* Content */}
-      <div className="p-3">
-        <h3 className="font-bold text-sm text-black dark:text-white mb-2 line-clamp-2 font-sora">
+      <div className="p-2.5">
+        <h3 className="font-bold text-sm text-black dark:text-white mb-1.5 line-clamp-2 font-sora leading-tight">
           {recipe.title}
         </h3>
 
-        <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 font-inter">
+        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 font-inter">
           {totalTime > 0 && (
             <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+              <Clock className="w-3.5 h-3.5" />
               <span>{totalTime}min</span>
             </div>
           )}
           <div className="flex items-center gap-1">
-            <Users className="w-3 h-3" />
-            <span>{meal.servings} porción{meal.servings !== 1 ? 'es' : ''}</span>
+            <Users className="w-3.5 h-3.5" />
+            <span>{meal.servings}</span>
           </div>
         </div>
       </div>
