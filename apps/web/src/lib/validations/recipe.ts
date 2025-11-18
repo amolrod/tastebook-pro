@@ -30,6 +30,7 @@ export const CreateRecipeSchema = z.object({
   description: z.string()
     .max(500, 'Máximo 500 caracteres')
     .optional(),
+  image_url: z.string().url('URL de imagen inválida').optional().nullable(),
   ingredients: z.array(IngredientSchema)
     .min(1, 'Al menos 1 ingrediente requerido'),
   instructions: z.array(z.string().min(1, 'Paso no puede estar vacío'))

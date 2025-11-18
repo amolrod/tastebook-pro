@@ -5,9 +5,10 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateRecipeSchema, type CreateRecipeInput } from '../../lib/validations/recipe';
 import { useCreateRecipe } from '../../hooks/useRecipes';
+import { useUploadRecipeImage } from '../../hooks/useUploadRecipeImage';
 import { IngredientList } from './IngredientList';
 import { StepList } from './StepList';
-import { Clock, Users } from 'lucide-react';
+import { Clock, Users, Upload, X, Image as ImageIcon } from 'lucide-react';
 import type { Recipe, Ingredient } from '../../types/database';
 import { toast } from 'sonner';
 
@@ -36,8 +37,11 @@ const COMMON_TAGS = [
  */
 export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorProps) {
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData?.tags || []);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
 
   const { mutate: createRecipe, isPending } = useCreateRecipe();
+  const uploadImage = useUploadRecipeImage();
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<CreateRecipeInput>({
     resolver: zodResolver(CreateRecipeSchema),
@@ -73,9 +77,43 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
     );
   };
 
-  const onSubmit = (data: any) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Tipo de archivo no permitido. Usa JPEG, PNG o WebP.');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('El archivo es demasiado grande. Máximo 5MB.');
+      return;
+    }
+
+    setImageFile(file);
+    
+    // Crear preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const onSubmit = async (data: any) => {
     console.log('🔍 Datos del formulario:', data);
     console.log('🏷️ Tags seleccionados:', selectedTags);
+    console.log('🖼️ Imagen:', imageFile);
     
     // Filtrar pasos vacíos e ingredientes vacíos
     const cleanedInstructions = data.instructions.filter((step: string) => step && step.trim() !== '');
@@ -95,11 +133,26 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
       return;
     }
     
+    // Subir imagen si existe
+    let imageUrl = initialData?.image_url || null;
+    if (imageFile) {
+      try {
+        toast.info('Subiendo imagen...');
+        imageUrl = await uploadImage.mutateAsync(imageFile);
+        console.log('✅ Imagen subida:', imageUrl);
+      } catch (error) {
+        console.error('❌ Error subiendo imagen:', error);
+        toast.error('Error al subir la imagen');
+        return;
+      }
+    }
+    
     const cleanedData = {
       ...data,
       instructions: cleanedInstructions,
       ingredients: cleanedIngredients,
       tags: selectedTags,
+      image_url: imageUrl,
     };
 
     console.log('📦 Datos finales a enviar (limpiados):', cleanedData);
@@ -188,6 +241,50 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
         />
         {errors.description && (
           <p className="text-red-500 text-sm mt-1 font-inter">{errors.description.message}</p>
+        )}
+      </div>
+
+      {/* Imagen */}
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-black dark:text-white font-inter">
+          Imagen de la receta
+        </label>
+        
+        {imagePreview ? (
+          <div className="relative w-full h-64 rounded-xl overflow-hidden border-2 border-[#E6E6E6] dark:border-[#333333]">
+            <img
+              src={imagePreview}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute top-3 right-3 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full shadow-lg transition-all"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-[#E6E6E6] dark:border-[#333333] rounded-xl cursor-pointer bg-[#F8F8F8] dark:bg-[#1A1A1A] hover:bg-[#F0F0F0] dark:hover:bg-[#262626] transition-all">
+            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+              <div className="p-4 bg-[#10b981]/10 rounded-full mb-4">
+                <ImageIcon className="w-10 h-10 text-[#10b981]" />
+              </div>
+              <p className="mb-2 text-sm text-gray-600 dark:text-gray-400 font-inter">
+                <span className="font-semibold">Click para subir</span> o arrastra una imagen
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500 font-inter">
+                PNG, JPG o WEBP (máx. 5MB)
+              </p>
+            </div>
+            <input
+              type="file"
+              className="hidden"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleImageChange}
+            />
+          </label>
         )}
       </div>
 
@@ -418,15 +515,15 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
       <div className="flex gap-3 pt-4">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || uploadImage.isPending}
           className="flex-1 bg-gradient-to-b from-[#10b981] to-[#059669] hover:from-[#0ea573] hover:to-[#047857] text-white py-3 rounded-lg font-semibold font-inter transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isPending ? 'Guardando...' : initialData ? 'Actualizar Receta' : 'Guardar Receta'}
+          {uploadImage.isPending ? 'Subiendo imagen...' : isPending ? 'Guardando...' : initialData ? 'Actualizar Receta' : 'Guardar Receta'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          disabled={isPending}
+          disabled={isPending || uploadImage.isPending}
           className="px-8 py-3 border border-[#E6E6E6] dark:border-[#333333] rounded-lg text-black dark:text-white font-semibold font-inter hover:bg-[#F8F8F8] dark:hover:bg-[#262626] transition-all disabled:opacity-50"
         >
           Cancelar
