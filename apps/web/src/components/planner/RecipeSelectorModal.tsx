@@ -73,6 +73,7 @@ export function RecipeSelectorModal({
 
   const handleSelectRecipe = (recipe: Recipe) => {
     // Siempre usar las porciones originales de la receta
+    console.log('🔍 Adding recipe:', recipe.title, 'with servings:', recipe.servings);
     onSelectRecipe(recipe.id, recipe.servings);
     onClose();
     setSearchQuery('');

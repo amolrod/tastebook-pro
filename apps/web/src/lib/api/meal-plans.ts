@@ -160,6 +160,8 @@ export const MealPlanService = {
     servings: number = 1
   ): Promise<MealPlan> {
     try {
+      console.log('💾 API saving with servings:', servings);
+      
       const updatedMeals = { ...currentMeals };
       
       if (!updatedMeals[day]) {
@@ -171,6 +173,8 @@ export const MealPlanService = {
         recipe_id: recipeId,
         servings,
       };
+
+      console.log('💾 Final meal object:', updatedMeals[day][mealType]);
 
       return await this.updateMealPlan(planId, updatedMeals);
     } catch (error) {
