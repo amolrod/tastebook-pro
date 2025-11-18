@@ -176,10 +176,12 @@ $$ LANGUAGE plpgsql;
 -- 5. Políticas RLS para user_activity
 ALTER TABLE user_activity ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view own activity" ON user_activity;
 CREATE POLICY "Users can view own activity"
   ON user_activity FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own activity" ON user_activity;
 CREATE POLICY "Users can insert own activity"
   ON user_activity FOR INSERT
   WITH CHECK (auth.uid() = user_id);
