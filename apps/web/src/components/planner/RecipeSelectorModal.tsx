@@ -33,6 +33,7 @@ export function RecipeSelectorModal({
 }: RecipeSelectorModalProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [selectedServings, setSelectedServings] = useState(1);
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
@@ -72,8 +73,10 @@ export function RecipeSelectorModal({
     return matchesSearch && matchesDifficulty && matchesFavorites && matchesTime && matchesTag && matchesServings;
   });
 
-  const handleSelectRecipe = (recipeId: string) => {
-    onSelectRecipe(recipeId, selectedServings);
+  const handleSelectRecipe = (recipe: Recipe) => {
+    // Usar las porciones configuradas o las de la receta por defecto
+    const servings = selectedRecipe?.id === recipe.id ? selectedServings : recipe.servings;
+    onSelectRecipe(recipe.id, servings);
     onClose();
     setSearchQuery('');
     setDifficultyFilter('');
@@ -81,7 +84,15 @@ export function RecipeSelectorModal({
     setTimeFilter('');
     setTagFilter('');
     setServingsFilter('');
+    setSelectedRecipe(null);
     setSelectedServings(1);
+  };
+
+  // Actualizar las porciones cuando se selecciona una receta para editar
+  const handleRecipeClick = (recipe: Recipe) => {
+    setSelectedRecipe(recipe);
+    setSelectedServings(recipe.servings);
+    handleSelectRecipe(recipe);
   };
 
   if (!isOpen) return null;
@@ -182,7 +193,7 @@ export function RecipeSelectorModal({
                 onChange={(e) => setServingsFilter(e.target.value)}
                 className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
               >
-                <option value="">Todas las porciones</option>
+                <option value="">Porciones</option>
                 <option value="1">1 porción</option>
                 <option value="2">2 porciones</option>
                 <option value="3">3 porciones</option>
@@ -224,7 +235,7 @@ export function RecipeSelectorModal({
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    onClick={() => handleSelectRecipe(recipe.id)}
+                    onClick={() => handleRecipeClick(recipe)}
                   />
                 ))}
               </div>
