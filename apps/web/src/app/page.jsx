@@ -133,13 +133,13 @@ export default function Dashboard() {
     return (
       <div className="flex items-center gap-0.5">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={`full-${i}`} size={14} className="fill-amber-400 text-amber-400" />
+          <Star key={`full-${rating}-${i}`} size={14} className="fill-amber-400 text-amber-400" />
         ))}
         {hasHalfStar && (
-          <Star size={14} className="fill-amber-200 text-amber-400" />
+          <Star key={`half-${rating}`} size={14} className="fill-amber-200 text-amber-400" />
         )}
         {[...Array(5 - fullStars - (hasHalfStar ? 1 : 0))].map((_, i) => (
-          <Star key={`empty-${i}`} size={14} className="text-gray-300 dark:text-gray-600" />
+          <Star key={`empty-${rating}-${i}`} size={14} className="text-gray-300 dark:text-gray-600" />
         ))}
       </div>
     );
@@ -449,7 +449,7 @@ export default function Dashboard() {
                 {loadingMeals ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                      <div key={`meal-skeleton-${i}`} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : upcomingMeals.length > 0 ? (
@@ -528,7 +528,7 @@ export default function Dashboard() {
                 {loadingAchievements ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                      <div key={`achievement-skeleton-${i}`} className="h-16 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : achievements.length > 0 ? (
@@ -600,7 +600,7 @@ export default function Dashboard() {
                 {loadingPopular ? (
                   <div className="space-y-3">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+                      <div key={`popular-skeleton-${i}`} className="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : popularRecipes.length > 0 ? (
