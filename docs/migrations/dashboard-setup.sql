@@ -82,7 +82,10 @@ BEGIN
   
   RETURN v_streak;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Dar permisos de ejecución a usuarios autenticados
+GRANT EXECUTE ON FUNCTION calculate_user_streak(UUID) TO authenticated;
 
 -- 4. Función para verificar y desbloquear achievements automáticamente
 -- Primero hacer DROP si existe con signature antigua
@@ -171,7 +174,10 @@ BEGIN
   
   RETURN;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Dar permisos de ejecución a usuarios autenticados
+GRANT EXECUTE ON FUNCTION check_and_unlock_achievements(UUID) TO authenticated;
 
 -- 5. Políticas RLS para user_activity
 ALTER TABLE user_activity ENABLE ROW LEVEL SECURITY;
