@@ -38,6 +38,7 @@ export function RecipeSelectorModal({
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [timeFilter, setTimeFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
+  const [servingsFilter, setServingsFilter] = useState('');
 
   const { data: allRecipes, isLoading } = useRecipes({}, 'created_at', 'desc');
   const { data: favorites } = useFavorites(user?.id);
@@ -66,7 +67,9 @@ export function RecipeSelectorModal({
 
     const matchesTag = !tagFilter || (recipe.tags && recipe.tags.includes(tagFilter));
 
-    return matchesSearch && matchesDifficulty && matchesFavorites && matchesTime && matchesTag;
+    const matchesServings = !servingsFilter || recipe.servings === Number(servingsFilter);
+
+    return matchesSearch && matchesDifficulty && matchesFavorites && matchesTime && matchesTag && matchesServings;
   });
 
   const handleSelectRecipe = (recipeId: string) => {
@@ -77,6 +80,7 @@ export function RecipeSelectorModal({
     setShowOnlyFavorites(false);
     setTimeFilter('');
     setTagFilter('');
+    setServingsFilter('');
     setSelectedServings(1);
   };
 
@@ -170,6 +174,24 @@ export function RecipeSelectorModal({
                 {allTags.sort().map(tag => (
                   <option key={tag} value={tag}>{tag}</option>
                 ))}
+              </select>
+
+              {/* Filtro de porciones */}
+              <select
+                value={servingsFilter}
+                onChange={(e) => setServingsFilter(e.target.value)}
+                className="px-4 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+              >
+                <option value="">Todas las porciones</option>
+                <option value="1">1 porción</option>
+                <option value="2">2 porciones</option>
+                <option value="3">3 porciones</option>
+                <option value="4">4 porciones</option>
+                <option value="5">5 porciones</option>
+                <option value="6">6 porciones</option>
+                <option value="8">8 porciones</option>
+                <option value="10">10 porciones</option>
+                <option value="12">12 porciones</option>
               </select>
             </div>
 

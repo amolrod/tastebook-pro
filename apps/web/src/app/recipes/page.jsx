@@ -81,12 +81,13 @@ export default function RecipesPage() {
         <Sidebar onClose={() => setSidebarOpen(false)} activePage="recipes" />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header
+          title="Biblioteca de Recetas"
           onMenuClick={() => setSidebarOpen(true)}
-          title="Mis Recetas"
-          onCreateClick={() => navigate('/recipes/new')}
+          onCreateClick={() => navigate("/recipes/new")}
+          hideSearch={true}
         />
 
         <div className="flex-1 overflow-y-auto p-4 md:p-8">
