@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { StreakService } from '../lib/api/streak';
 
 interface AuthContextType {
   user: User | null;
@@ -35,10 +36,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Escuchar cambios de auth
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      // Registrar actividad de login cuando el usuario inicia sesión
+      if (event === 'SIGNED_IN' && session?.user?.id) {
+        try {
+          await StreakService.recordActivity(session.user.id, 'login');
+        } catch (error) {
+          console.error('Error recording login activity:', error);
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
