@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateRecipeSchema, type CreateRecipeInput } from '../../lib/validations/recipe';
-import { useCreateRecipe } from '../../hooks/useRecipes';
+import { useCreateRecipe, useUpdateRecipe } from '../../hooks/useRecipes';
 import { useUploadRecipeImage } from '../../hooks/useUploadRecipeImage';
 import { IngredientList } from './IngredientList';
 import { StepList } from './StepList';
@@ -40,7 +40,10 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
 
-  const { mutate: createRecipe, isPending } = useCreateRecipe();
+  const isEditMode = !!initialData?.id;
+  const { mutate: createRecipe, isPending: isCreating } = useCreateRecipe();
+  const { mutate: updateRecipe, isPending: isUpdating } = useUpdateRecipe();
+  const isPending = isCreating || isUpdating;
   const uploadImage = useUploadRecipeImage();
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<CreateRecipeInput>({
@@ -157,24 +160,58 @@ export function RecipeEditor({ initialData, onSuccess, onCancel }: RecipeEditorP
 
     console.log('📦 Datos finales a enviar (limpiados):', cleanedData);
 
-    createRecipe(cleanedData as CreateRecipeInput, {
-      onSuccess: (createdRecipe) => {
-        console.log('✅ Receta creada:', createdRecipe);
-        toast.success('Receta creada exitosamente');
-        // Navegar a la página de recetas
-        setTimeout(() => {
-          window.location.href = '/recipes';
-        }, 1000);
-      },
-      onError: (error: any) => {
-        console.error('❌ Error creando receta:', error);
-        if (error.message?.includes('row-level security')) {
-          toast.error('Error de permisos. Configura RLS en Supabase Dashboard');
-        } else {
-          toast.error('Error al crear receta: ' + (error.message || 'Error desconocido'));
+    if (isEditMode && initialData?.id) {
+      // Modo edición
+      updateRecipe(
+        { id: initialData.id, updates: cleanedData as any },
+        {
+          onSuccess: (updatedRecipe) => {
+            console.log('✅ Receta actualizada:', updatedRecipe);
+            toast.success('Receta actualizada exitosamente');
+            if (onSuccess) {
+              onSuccess(updatedRecipe);
+            } else {
+              // Navegar al detalle de la receta
+              setTimeout(() => {
+                window.location.href = `/recipes/${initialData.id}`;
+              }, 1000);
+            }
+          },
+          onError: (error: any) => {
+            console.error('❌ Error actualizando receta:', error);
+            if (error.message?.includes('row-level security')) {
+              toast.error('Error de permisos. Verifica que seas el dueño de esta receta');
+            } else {
+              toast.error('Error al actualizar receta: ' + (error.message || 'Error desconocido'));
+            }
+          },
         }
-      },
-    });
+      );
+    } else {
+      // Modo creación
+      createRecipe(cleanedData as CreateRecipeInput, {
+        onSuccess: (createdRecipe) => {
+          console.log('✅ Receta creada:', createdRecipe);
+          toast.success('Receta creada exitosamente');
+          if (onSuccess) {
+            onSuccess(createdRecipe);
+          } else {
+            // Navegar a la página de recetas
+            setTimeout(() => {
+              window.location.href = '/recipes';
+            }, 1000);
+          }
+        },
+        onError: (error: any) => {
+          console.error('❌ Error creando receta:', error);
+          if (error.message?.includes('row-level security')) {
+            toast.error('Error de permisos. Configura RLS en Supabase Dashboard');
+          } else {
+            toast.error('Error al crear receta: ' + (error.message || 'Error desconocido'));
+          }
+        },
+      });
+    }
   };
 
   // Log de errores de validación
