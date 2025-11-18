@@ -533,36 +533,39 @@ export default function Dashboard() {
                   </div>
                 ) : achievements.length > 0 ? (
                   <div className="space-y-3">
-                    {achievements.map((achievement, idx) => (
-                      <motion.div
-                        key={achievement.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-[#E6E6E6] dark:border-[#404040] bg-[#F8F8F8] dark:bg-[#262626] hover:bg-white dark:hover:bg-[#2A2A2A] transition-all cursor-pointer"
-                      >
-                        <div
-                          className={`w-12 h-12 rounded-full flex items-center justify-center ${getTierColor(achievement.tier)}`}
+                    {achievements.map((userAchievement, idx) => {
+                      const achievement = userAchievement.achievement || userAchievement;
+                      return (
+                        <motion.div
+                          key={userAchievement.achievement_id || achievement.id}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: idx * 0.1 }}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-[#E6E6E6] dark:border-[#404040] bg-[#F8F8F8] dark:bg-[#262626] hover:bg-white dark:hover:bg-[#2A2A2A] transition-all cursor-pointer"
                         >
-                          <span className="text-2xl">{achievement.icon}</span>
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-semibold text-black dark:text-white font-inter text-sm">
-                              {achievement.name}
-                            </p>
-                            <span
-                              className={`px-2 py-0.5 text-xs font-bold rounded-full ${getTierBadge(achievement.tier)}`}
-                            >
-                              {achievement.tier}
-                            </span>
+                          <div
+                            className={`w-12 h-12 rounded-full flex items-center justify-center ${getTierColor(achievement.tier)}`}
+                          >
+                            <span className="text-2xl">{achievement.icon}</span>
                           </div>
-                          <p className="text-xs text-[#6E6E6E] dark:text-[#AAAAAA] font-inter">
-                            {achievement.description}
-                          </p>
-                        </div>
-                      </motion.div>
-                    ))}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-semibold text-black dark:text-white font-inter text-sm">
+                                {achievement.name}
+                              </p>
+                              <span
+                                className={`px-2 py-0.5 text-xs font-bold rounded-full ${getTierBadge(achievement.tier)}`}
+                              >
+                                {achievement.tier}
+                              </span>
+                            </div>
+                            <p className="text-xs text-[#6E6E6E] dark:text-[#AAAAAA] font-inter">
+                              {achievement.description}
+                            </p>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
