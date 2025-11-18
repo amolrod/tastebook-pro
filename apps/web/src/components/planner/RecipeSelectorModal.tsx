@@ -33,8 +33,6 @@ export function RecipeSelectorModal({
 }: RecipeSelectorModalProps) {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [selectedServings, setSelectedServings] = useState(1);
   const [difficultyFilter, setDifficultyFilter] = useState('');
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [timeFilter, setTimeFilter] = useState('');
@@ -74,9 +72,8 @@ export function RecipeSelectorModal({
   });
 
   const handleSelectRecipe = (recipe: Recipe) => {
-    // Usar las porciones configuradas o las de la receta por defecto
-    const servings = selectedRecipe?.id === recipe.id ? selectedServings : recipe.servings;
-    onSelectRecipe(recipe.id, servings);
+    // Siempre usar las porciones originales de la receta
+    onSelectRecipe(recipe.id, recipe.servings);
     onClose();
     setSearchQuery('');
     setDifficultyFilter('');
@@ -84,15 +81,6 @@ export function RecipeSelectorModal({
     setTimeFilter('');
     setTagFilter('');
     setServingsFilter('');
-    setSelectedRecipe(null);
-    setSelectedServings(1);
-  };
-
-  // Actualizar las porciones cuando se selecciona una receta para editar
-  const handleRecipeClick = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
-    setSelectedServings(recipe.servings);
-    handleSelectRecipe(recipe);
   };
 
   if (!isOpen) return null;
@@ -205,22 +193,6 @@ export function RecipeSelectorModal({
                 <option value="12">12 porciones</option>
               </select>
             </div>
-
-            {/* Selector de porciones (fuera de filtros) */}
-            <div className="flex items-center gap-2 pt-2 border-t border-[#E6E6E6] dark:border-[#333333]">
-              <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 font-inter">
-                Porciones a preparar:
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="20"
-                value={selectedServings}
-                onChange={(e) => setSelectedServings(Number(e.target.value))}
-                className="w-20 px-3 py-2 border border-[#E6E6E6] dark:border-[#333333] rounded-lg bg-white dark:bg-[#262626] text-black dark:text-white font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-              />
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-inter">(Aplicará a la receta seleccionada)</span>
-            </div>
           </div>
 
           {/* Recipe Grid */}
@@ -235,7 +207,7 @@ export function RecipeSelectorModal({
                   <RecipeCard
                     key={recipe.id}
                     recipe={recipe}
-                    onClick={() => handleRecipeClick(recipe)}
+                    onClick={() => handleSelectRecipe(recipe)}
                   />
                 ))}
               </div>
