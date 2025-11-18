@@ -4,9 +4,9 @@ Planificación detallada del desarrollo por sprints con tareas específicas y ch
 
 ## Estado Actual
 
-**Sprint:** 4 - Planificador Semanal Completo  
+**Sprint:** 5 - Lista de Compras Inteligente  
 **Última actualización:** 18 Nov 2025  
-**Progreso general:** 45%
+**Progreso general:** 60%
 
 ---
 
@@ -209,7 +209,110 @@ git push origin main
 
 ---
 
-## Sprint 5 - Gamificación y Social (Semana 4)
+## Sprint 5 - Lista de Compras Inteligente (Semana 4) ✅ COMPLETADO
+
+**Objetivo:** Crear sistema de lista de compras con categorización automática y UX intuitiva.
+
+### ✅ Completado
+
+#### Sistema de Categorización
+- [x] Crear diccionario de 120+ ingredientes comunes
+- [x] Implementar 9 categorías con metadata (label, icon, color)
+- [x] Función de normalización de nombres (acentos, plurales)
+- [x] Auto-categorización con matching exacto y parcial
+- [x] Fallback a categoría "Otros" para desconocidos
+
+#### Página /shopping
+- [x] Formulario para agregar ingredientes (nombre, cantidad, unidad)
+- [x] Progress bar con porcentaje de completado
+- [x] Grid responsive de categorías con headers coloridos
+- [x] Toggle checked/unchecked con un click
+- [x] Botón para eliminar items (hover)
+- [x] Botón para limpiar todos los comprados
+- [x] Botón compartir con native API + clipboard fallback
+- [x] Empty state atractivo
+- [x] Animaciones con framer-motion (staggered entrance)
+
+#### Hooks y Estado
+- [x] useShoppingList() - fetch con auto-creación
+- [x] useAddShoppingItem() - con auto-categorización
+- [x] useToggleShoppingItem() - optimistic update
+- [x] useRemoveShoppingItem() - con confirmación toast
+- [x] useClearCheckedItems() - limpiar comprados
+- [x] React Query para cache y optimistic updates
+
+#### UX y Diseño
+- [x] Keyboard shortcuts (Enter para agregar)
+- [x] Loading states en todas las mutaciones
+- [x] Toast notifications con sonner
+- [x] Dark mode completo
+- [x] Responsive mobile-first
+- [x] Hover effects y transiciones suaves
+- [x] Confirmación para limpiar items comprados
+
+### Métricas
+- 120+ ingredientes en diccionario
+- 9 categorías distintas
+- 6 hooks personalizados
+- 100% funcional sin APIs externas
+- 0 dependencias adicionales
+
+### Checkpoint Sprint 5
+```bash
+git add .
+git commit -m "feat(shopping): implement smart shopping list with auto-categorization"
+git push origin main
+```
+
+---
+
+## Sprint 6 - Generación Automática y Mejoras Shopping List (Semana 5)
+
+**Objetivo:** Conectar shopping list con meal planner y mejorar categorización.
+
+### Tareas
+
+#### Integración Meal Plan → Shopping List
+- [ ] Crear función `generateShoppingListFromMealPlan(planId)`
+- [ ] Extraer ingredientes de todas las recetas del plan
+- [ ] Agrupar ingredientes duplicados por nombre normalizado
+- [ ] Sumar cantidades de la misma unidad
+- [ ] Convertir unidades compatibles (g ↔ kg, ml ↔ L)
+- [ ] Botón en Planner: "Generar Lista de Compra"
+- [ ] Modal de confirmación mostrando preview de items a agregar
+- [ ] Opción: "Agregar a lista existente" vs "Crear nueva"
+
+#### Mejoras de Categorización
+- [ ] Permitir al usuario reasignar categoría de un item
+- [ ] Guardar reasignaciones en localStorage
+- [ ] Sugerir categorías basadas en reasignaciones previas
+- [ ] Expandir diccionario a 200+ ingredientes
+- [ ] Agregar sinónimos regionales (aguacate/palta, papa/patata)
+
+#### Gestión Avanzada
+- [ ] Editar cantidad/unidad inline (click para editar)
+- [ ] Agregar notas por item (ej: "orgánico", "marca X")
+- [ ] Marcar items como "urgente" con badge rojo
+- [ ] Filtrar vista por categoría (botones en header)
+- [ ] Buscar items en la lista (input de búsqueda)
+- [ ] Ordenar por: alfabético, categoría, checked
+
+#### Export y Share
+- [ ] Exportar lista a PDF (con logo de la app)
+- [ ] Exportar a formato para impresión (optimizado)
+- [ ] Compartir por WhatsApp con formato mejorado
+- [ ] Enviar por email con template HTML
+
+### Checkpoint Sprint 6
+```bash
+git add .
+git commit -m "feat(shopping): add meal plan integration and advanced management features"
+git push origin main
+```
+
+---
+
+## Sprint 7 - Gamificación y Social (Semana 6)
 
 **Objetivo:** Añadir sistema de logros y perfiles de usuario.
 
@@ -244,7 +347,7 @@ git push origin main
 - [ ] Calcular average rating automáticamente (trigger DB)
 - [ ] Permitir editar/eliminar review propia
 
-### Checkpoint Sprint 5
+### Checkpoint Sprint 7
 ```bash
 git add .
 git commit -m "feat(social): add achievements system, user profiles and recipe reviews"
