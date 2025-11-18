@@ -100,7 +100,7 @@ export const RecipeService = {
       // Construir query base
       let query = supabase
         .from('recipes')
-        .select('*');
+        .select('*, reviews(rating)');
 
       // Aplicar filtro de recetas públicas o del usuario
       if (filters.isPublic !== false) {
@@ -148,8 +148,21 @@ export const RecipeService = {
         throw new Error(`Error al obtener recetas: ${error.message}`);
       }
 
+      // Calcular rating promedio real basado en las reseñas
+      let recipes = (data || []).map((recipe: any) => {
+        if (recipe.reviews && Array.isArray(recipe.reviews) && recipe.reviews.length > 0) {
+          const sum = recipe.reviews.reduce((acc: number, curr: { rating: number }) => acc + curr.rating, 0);
+          const avg = sum / recipe.reviews.length;
+          return {
+            ...recipe,
+            rating_avg: avg,
+            rating_count: recipe.reviews.length
+          };
+        }
+        return recipe;
+      }) as Recipe[];
+      
       // Filtrar por tiempo total (en memoria, ya que es suma de campos)
-      let recipes = data as Recipe[];
       
       if (filters.maxTime) {
         recipes = recipes.filter((recipe) => {

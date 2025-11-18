@@ -205,23 +205,51 @@ export function usePopularRecipes(limit: number = 5) {
   return useQuery({
     queryKey: ['popular-recipes', limit],
     queryFn: async () => {
+      // Fetch recipes with their reviews to calculate rating on the fly
+      // We fetch more than limit to ensure we have enough candidates after sorting
       const { data, error } = await supabase
         .from('recipes')
-        .select('*')
+        .select('*, reviews(rating)')
         .eq('is_public', true)
-        .not('rating_avg', 'is', null)
-        .order('rating_avg', { ascending: false })
-        .order('rating_count', { ascending: false })
-        .limit(limit);
+        .limit(50);
 
       if (error) {
         console.error('Error fetching popular recipes:', error);
         return [];
       }
 
-      return data || [];
+      // Calculate ratings and sort in memory
+      const recipesWithRating = data.map(recipe => {
+        const reviews = recipe.reviews || [];
+        const rating_count = reviews.length;
+        const rating_avg = rating_count > 0
+          ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / rating_count
+          : 0;
+        
+        return {
+          ...recipe,
+          rating_avg, // Override DB value with calculated one
+          rating_count
+        };
+      });
+
+      // Sort by rating (desc), then by views (desc)
+      recipesWithRating.sort((a, b) => {
+        // First priority: Rating
+        if (b.rating_avg !== a.rating_avg) {
+          return b.rating_avg - a.rating_avg;
+        }
+        // Second priority: Number of ratings
+        if (b.rating_count !== a.rating_count) {
+          return b.rating_count - a.rating_count;
+        }
+        // Third priority: Views
+        return (b.views_count || 0) - (a.views_count || 0);
+      });
+
+      return recipesWithRating.slice(0, limit);
     },
-    staleTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutos
   });
 }
 

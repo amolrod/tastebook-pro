@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useRecipe, useDeleteRecipe } from '../../hooks/useRecipes';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import { ErrorMessage } from '../ui/ErrorMessage';
-import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2, Heart, BookOpen, Flame } from 'lucide-react';
+import { Clock, Users, ChefHat, Edit, Trash2, ArrowLeft, Share2, Heart, BookOpen, Flame, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useState } from 'react';
@@ -10,6 +10,9 @@ import type { Recipe } from '../../types/database';
 import { useAuth } from '../../contexts/AuthContext';
 import { useIsFavorite } from '../../hooks/useIsFavorite';
 import { useToggleFavorite } from '../../hooks/useToggleFavorite';
+import { ReviewForm } from '../reviews/ReviewForm';
+import { ReviewList } from '../reviews/ReviewList';
+import { useReviewStats } from '../../hooks/useReviews';
 
 const DIFFICULTY_LABELS = {
   facil: 'Fácil',
@@ -27,6 +30,7 @@ export function RecipeDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: recipe, isLoading, error, refetch } = useRecipe(id!);
+  const { data: reviewStats } = useReviewStats(id!);
   const { mutate: deleteRecipe, isPending: isDeleting } = useDeleteRecipe();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
@@ -206,6 +210,32 @@ export function RecipeDetail() {
             >
               {recipe.title}
             </motion.h1>
+            
+            {reviewStats && reviewStats.count > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="flex items-center gap-2 mb-4"
+              >
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-5 h-5 ${
+                        star <= Math.round(reviewStats.average)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-gray-400'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-white/90 font-inter">
+                  ({reviewStats.count} {reviewStats.count === 1 ? 'reseña' : 'reseñas'})
+                </span>
+              </motion.div>
+            )}
+
             {recipe.description && (
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
@@ -363,6 +393,27 @@ export function RecipeDetail() {
             </ol>
           </motion.div>
         </div>
+
+        {/* Reviews Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9 }}
+          className="mt-12"
+        >
+          <h2 className="text-2xl font-bold text-black dark:text-white font-sora mb-8">
+            Reseñas y Opiniones
+          </h2>
+          
+          <div className="grid lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1">
+              <ReviewForm recipeId={id!} onSuccess={() => refetch()} />
+            </div>
+            <div className="lg:col-span-2">
+              <ReviewList recipeId={id!} />
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Delete Confirmation Modal */}

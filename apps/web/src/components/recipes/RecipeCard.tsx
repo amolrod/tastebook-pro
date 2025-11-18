@@ -64,44 +64,28 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
         {/* Overlay gradiente en hover */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         
-        {/* Favorite Button - Mejorado */}
-        {user && (
-          <motion.button
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleFavoriteClick}
-            disabled={toggleFavorite.isPending || isFavoriteLoading}
-            className={`absolute top-3 right-3 p-3 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 ${
-              isFavorite
-                ? 'bg-red-500/90 hover:bg-red-600'
-                : 'bg-white/90 dark:bg-[#1A1A1A]/90 hover:bg-white dark:hover:bg-[#1A1A1A]'
-            } ${
-              toggleFavorite.isPending || isFavoriteLoading
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
-          >
-            {toggleFavorite.isPending || isFavoriteLoading ? (
-              <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Heart
-                className={`w-5 h-5 transition-all duration-300 ${
-                  isFavorite
-                    ? 'fill-white text-white scale-110'
-                    : 'text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-500'
-                }`}
-              />
-            )}
-          </motion.button>
-        )}
-        
-        {/* Rating Badge */}
-        {recipe.rating_avg && recipe.rating_avg > 0 && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 bg-amber-400 text-white px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-            <Star className="w-4 h-4 fill-white" />
-            <span className="font-bold text-sm">{recipe.rating_avg.toFixed(1)}</span>
-          </div>
-        )}
+        {/* Favorite Button */}
+        <button
+          onClick={handleFavoriteClick}
+          disabled={toggleFavorite.isPending || isFavoriteLoading}
+          className={`absolute top-3 right-3 p-2.5 rounded-full shadow-lg backdrop-blur-md transition-all ${
+            isFavorite
+              ? 'bg-red-500/90 hover:bg-red-600'
+              : 'bg-white/90 dark:bg-[#1A1A1A]/90 hover:bg-white'
+          } ${toggleFavorite.isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
+        >
+          {toggleFavorite.isPending || isFavoriteLoading ? (
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <Heart
+              className={`w-5 h-5 transition-all ${
+                isFavorite
+                  ? 'fill-white text-white scale-110'
+                  : 'text-red-500 hover:scale-110'
+              }`}
+            />
+          )}
+        </button>
       </div>
 
       {/* Content */}
@@ -170,16 +154,25 @@ export function RecipeCard({ recipe, onClick }: RecipeCardProps) {
             </span>
           )}
 
-          {/* Hover indicator */}
-          <motion.div
-            className="opacity-0 group-hover:opacity-100 transition-opacity"
-            initial={{ x: -10 }}
-            animate={{ x: 0 }}
-          >
-            <span className="text-[#10b981] text-sm font-semibold font-inter">
-              Ver receta →
-            </span>
-          </motion.div>
+          {/* Rating Badge */}
+          {recipe.rating_avg !== null && recipe.rating_avg !== undefined && recipe.rating_avg > 0 ? (
+            <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
+              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+              <span className="font-bold text-sm text-amber-700 dark:text-amber-400">
+                {Number(recipe.rating_avg).toFixed(1)}
+              </span>
+            </div>
+          ) : (
+            <motion.div
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+              initial={{ x: -10 }}
+              animate={{ x: 0 }}
+            >
+              <span className="text-[#10b981] text-sm font-semibold font-inter">
+                Ver receta →
+              </span>
+            </motion.div>
+          )}
         </div>
       </div>
     </motion.div>

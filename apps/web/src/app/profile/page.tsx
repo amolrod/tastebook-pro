@@ -20,15 +20,22 @@ import {
   Target,
   ArrowLeft,
   Home,
+  Trophy,
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useUserStats } from '../../hooks/useUserStats';
 import { useUpdateProfile } from '../../hooks/useUpdateProfile';
 import { useUploadAvatar } from '../../hooks/useUploadAvatar';
+import { useRecipes } from '../../hooks/useRecipes';
+import { useQuery } from '@tanstack/react-query';
+import { AchievementService, Achievement, UserAchievement } from '../../lib/api/achievements';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useNavigate } from 'react-router';
+import { RecipeCard } from '../../components/recipes/RecipeCard';
 
 type TabType = 'overview' | 'recipes' | 'achievements';
 
@@ -47,6 +54,24 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     full_name: '',
     bio: '',
+  });
+
+  // Fetch User Recipes
+  const { data: userRecipes, isLoading: isLoadingRecipes } = useRecipes({ 
+    userId: user?.id 
+  });
+
+  // Fetch User Achievements
+  const { data: userAchievements = [], isLoading: isLoadingAchievements } = useQuery({
+    queryKey: ['user-achievements', user?.id],
+    queryFn: () => user?.id ? AchievementService.getUserAchievements(user.id) : [],
+    enabled: !!user?.id,
+  });
+
+  // Fetch All Achievements (for details)
+  const { data: allAchievements = [] } = useQuery({
+    queryKey: ['all-achievements'],
+    queryFn: () => AchievementService.getAllAchievements(),
   });
 
   // Sincronizar formData con profile
@@ -301,37 +326,47 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                {/* Actions Grid */}
+                <div className="grid grid-cols-2 gap-3 mt-6">
+                  <button
                     onClick={() => navigate('/recipes')}
+                    className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#262626] rounded-xl hover:bg-[#10b981]/10 hover:text-[#10b981] transition-all group border border-transparent hover:border-[#10b981]/20"
                   >
-                    <Home size={16} className="mr-2" />
-                    Ir a Recetas
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                    <div className="p-2 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                      <Home size={20} className="text-gray-600 dark:text-gray-400 group-hover:text-[#10b981]" />
+                    </div>
+                    <span className="text-xs font-semibold font-inter">Recetas</span>
+                  </button>
+
+                  <button
                     onClick={() => navigate('/favorites')}
+                    className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#262626] rounded-xl hover:bg-[#ff6b35]/10 hover:text-[#ff6b35] transition-all group border border-transparent hover:border-[#ff6b35]/20"
                   >
-                    <Heart size={16} className="mr-2" />
-                    Mis Favoritos
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => {}}>
-                    <Settings size={16} className="mr-2" />
-                    Configuración
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
+                    <div className="p-2 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                      <Heart size={20} className="text-gray-600 dark:text-gray-400 group-hover:text-[#ff6b35]" />
+                    </div>
+                    <span className="text-xs font-semibold font-inter">Favoritos</span>
+                  </button>
+
+                  <button
+                    onClick={() => {}}
+                    className="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-[#262626] rounded-xl hover:bg-[#3b82f6]/10 hover:text-[#3b82f6] transition-all group border border-transparent hover:border-[#3b82f6]/20"
+                  >
+                    <div className="p-2 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                      <Settings size={20} className="text-gray-600 dark:text-gray-400 group-hover:text-[#3b82f6]" />
+                    </div>
+                    <span className="text-xs font-semibold font-inter">Ajustes</span>
+                  </button>
+
+                  <button
                     onClick={handleLogout}
-                    className="text-red-600 hover:text-red-700"
+                    className="flex flex-col items-center justify-center p-4 bg-red-50 dark:bg-red-900/10 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-all group border border-transparent hover:border-red-200 dark:hover:border-red-800/30"
                   >
-                    <LogOut size={16} className="mr-2" />
-                    Cerrar Sesión
-                  </Button>
+                    <div className="p-2 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm mb-2 group-hover:scale-110 transition-transform">
+                      <LogOut size={20} className="text-red-500 group-hover:text-red-600" />
+                    </div>
+                    <span className="text-xs font-semibold font-inter">Salir</span>
+                  </button>
                 </div>
               </div>
 
@@ -448,42 +483,126 @@ export default function ProfilePage() {
                   transition={{ duration: 0.3 }}
                   className="grid grid-cols-1 lg:grid-cols-3 gap-6"
                 >
-                  {/* Actividad Reciente */}
-                  <div className="lg:col-span-2 bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg p-6">
-                    <h2 className="text-xl font-bold text-black dark:text-white font-sora mb-6 flex items-center gap-2">
-                      <Clock size={24} className="text-[#10b981]" />
-                      Actividad Reciente
-                    </h2>
-                    <div className="text-center py-12">
-                      <Clock size={64} className="mx-auto text-gray-300 dark:text-gray-700 mb-4" />
-                      <p className="text-gray-600 dark:text-gray-400 font-inter">
-                        Tu actividad aparecerá aquí cuando empieces a usar la app
-                      </p>
+                  {/* Actividad Reciente / Últimas Recetas */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg p-6">
+                      <h2 className="text-xl font-bold text-black dark:text-white font-sora mb-6 flex items-center gap-2">
+                        <ChefHat size={24} className="text-[#10b981]" />
+                        Últimas Recetas Publicadas
+                      </h2>
+                      
+                      {isLoadingRecipes ? (
+                        <div className="flex justify-center py-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#10b981]"></div>
+                        </div>
+                      ) : userRecipes && userRecipes.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {userRecipes.slice(0, 2).map((recipe) => (
+                            <RecipeCard 
+                              key={recipe.id} 
+                              recipe={recipe} 
+                              onClick={() => navigate(`/recipes/${recipe.id}`)}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 bg-gray-50 dark:bg-[#262626] rounded-xl">
+                          <ChefHat size={48} className="mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                          <p className="text-gray-600 dark:text-gray-400 font-inter mb-4">
+                            Aún no has publicado ninguna receta
+                          </p>
+                          <Button onClick={() => navigate('/recipes/new')}>
+                            Crear mi primera receta
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {userRecipes && userRecipes.length > 2 && (
+                        <div className="mt-6 text-center">
+                          <Button variant="outline" onClick={() => setActiveTab('recipes')}>
+                            Ver todas mis recetas
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Quick Stats */}
+                  {/* Quick Stats & Achievements Preview */}
                   <div className="space-y-6">
                     {/* Resumen Rápido */}
-                    <div className="bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl shadow-lg p-6 text-white">
+                    <div className="bg-gradient-to-br from-[#10b981] to-[#059669] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <TrendingUp size={100} />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className="font-bold font-sora text-lg">Tu Impacto</h3>
+                          <TrendingUp size={24} />
+                        </div>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <span className="text-white/90 text-sm font-inter">Recetas creadas</span>
+                            <span className="text-2xl font-bold font-sora">{stats?.recipesCount || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <span className="text-white/90 text-sm font-inter">Favoritos recibidos</span>
+                            <span className="text-2xl font-bold font-sora">{stats?.favoritesCount || 0}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+                            <span className="text-white/90 text-sm font-inter">Planes activos</span>
+                            <span className="text-2xl font-bold font-sora">{stats?.plansCount || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Logros Recientes Preview */}
+                    <div className="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-bold font-sora">Tu Actividad</h3>
-                        <TrendingUp size={24} />
+                        <h3 className="font-bold font-sora text-black dark:text-white">Logros</h3>
+                        <Award size={20} className="text-[#f59e0b]" />
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white/80 text-sm font-inter">Recetas creadas</span>
-                          <span className="text-2xl font-bold font-sora">{stats?.recipesCount || 0}</span>
+                      
+                      {userAchievements.length > 0 ? (
+                        <div className="space-y-3">
+                          {userAchievements.slice(0, 3).map((ua: any) => {
+                            const achievement = allAchievements.find(a => a.id === ua.achievement_id);
+                            if (!achievement) return null;
+                            return (
+                              <div key={ua.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-[#262626] transition-colors">
+                                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600 dark:text-amber-400">
+                                  <Trophy size={16} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold text-black dark:text-white truncate">
+                                    {achievement.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                    {new Date(ua.unlocked_at).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full mt-2 text-[#10b981]"
+                            onClick={() => setActiveTab('achievements')}
+                          >
+                            Ver todos
+                          </Button>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-white/80 text-sm font-inter">Favoritos</span>
-                          <span className="text-2xl font-bold font-sora">{stats?.favoritesCount || 0}</span>
+                      ) : (
+                        <div className="text-center py-6">
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                            Aún no has desbloqueado logros
+                          </p>
+                          <Button variant="outline" size="sm" onClick={() => setActiveTab('achievements')}>
+                            Ver disponibles
+                          </Button>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-white/80 text-sm font-inter">Planes</span>
-                          <span className="text-2xl font-bold font-sora">{stats?.plansCount || 0}</span>
-                        </div>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -496,20 +615,47 @@ export default function ProfilePage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg p-6"
                 >
-                  <h2 className="text-xl font-bold text-black dark:text-white font-sora mb-6">
-                    Mis Recetas Publicadas
-                  </h2>
-                  <div className="text-center py-12">
-                    <ChefHat size={64} className="mx-auto text-gray-300 dark:text-gray-700 mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400 font-inter mb-4">
-                      Aún no has publicado recetas
-                    </p>
-                    <Button onClick={() => navigate('/recipes')}>
-                      Ver Todas las Recetas
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-black dark:text-white font-sora">
+                      Mis Recetas ({userRecipes?.length || 0})
+                    </h2>
+                    <Button onClick={() => navigate('/recipes/new')}>
+                      <ChefHat size={18} className="mr-2" />
+                      Nueva Receta
                     </Button>
                   </div>
+
+                  {isLoadingRecipes ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-80 bg-gray-200 dark:bg-[#262626] rounded-2xl animate-pulse" />
+                      ))}
+                    </div>
+                  ) : userRecipes && userRecipes.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {userRecipes.map((recipe) => (
+                        <RecipeCard 
+                          key={recipe.id} 
+                          recipe={recipe} 
+                          onClick={() => navigate(`/recipes/${recipe.id}`)}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-20 bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg">
+                      <ChefHat size={64} className="mx-auto text-gray-300 dark:text-gray-700 mb-6" />
+                      <h3 className="text-xl font-bold text-black dark:text-white mb-2">
+                        No tienes recetas publicadas
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 font-inter mb-6 max-w-md mx-auto">
+                        Comparte tus mejores creaciones culinarias con la comunidad de Tastebook Pro.
+                      </p>
+                      <Button size="lg" onClick={() => navigate('/recipes/new')}>
+                        Crear mi primera receta
+                      </Button>
+                    </div>
+                  )}
                 </motion.div>
               )}
 
@@ -522,17 +668,67 @@ export default function ProfilePage() {
                   transition={{ duration: 0.3 }}
                   className="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-lg p-6"
                 >
-                  <h2 className="text-xl font-bold text-black dark:text-white font-sora mb-6">
-                    Logros Desbloqueados
-                  </h2>
-                  <div className="text-center py-12">
-                    <Award size={64} className="mx-auto text-gray-300 dark:text-gray-700 mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400 font-inter mb-2">
-                      Los logros estarán disponibles próximamente
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500 font-inter">
-                      Sigue cocinando para desbloquear badges especiales
-                    </p>
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h2 className="text-2xl font-bold text-black dark:text-white font-sora mb-2">
+                        Logros y Medallas
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-400 font-inter">
+                        Desbloquea medallas completando desafíos culinarios
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-[#10b981] font-sora">
+                        {userAchievements.length} / {allAchievements.length}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-inter">
+                        Desbloqueados
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {allAchievements.map((achievement) => {
+                      const isUnlocked = userAchievements.some((ua: any) => ua.achievement_id === achievement.id);
+                      const unlockedData = userAchievements.find((ua: any) => ua.achievement_id === achievement.id);
+                      
+                      return (
+                        <div 
+                          key={achievement.id}
+                          className={`relative p-4 rounded-xl border-2 transition-all ${
+                            isUnlocked 
+                              ? 'border-[#10b981]/20 bg-[#10b981]/5 dark:bg-[#10b981]/10' 
+                              : 'border-gray-200 dark:border-[#333333] bg-gray-50 dark:bg-[#262626] opacity-70'
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className={`p-3 rounded-full ${
+                              isUnlocked 
+                                ? 'bg-[#10b981] text-white shadow-lg shadow-[#10b981]/30' 
+                                : 'bg-gray-200 dark:bg-[#333333] text-gray-400'
+                            }`}>
+                              {isUnlocked ? <Trophy size={24} /> : <Lock size={24} />}
+                            </div>
+                            <div className="flex-1">
+                              <h3 className={`font-bold font-sora mb-1 ${
+                                isUnlocked ? 'text-black dark:text-white' : 'text-gray-500 dark:text-gray-400'
+                              }`}>
+                                {achievement.name}
+                              </h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-500 font-inter mb-2 line-clamp-2">
+                                {achievement.description}
+                              </p>
+                              {isUnlocked && (
+                                <div className="flex items-center gap-1 text-xs text-[#10b981] font-medium">
+                                  <Sparkles size={12} />
+                                  <span>Desbloqueado el {new Date(unlockedData.unlocked_at).toLocaleDateString()}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </motion.div>
               )}

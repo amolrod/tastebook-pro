@@ -397,15 +397,6 @@ function RecipeCard({ recipe, totalTime, difficultyLabels, user, navigate }) {
           )}
         </button>
         
-        {/* Rating Badge */}
-        {recipe.rating_avg && (
-          <div className="absolute top-3 left-3 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md border border-[#E6E6E6] dark:border-[#404040]">
-            <Star className="w-4 h-4 fill-[#f59e0b] text-[#f59e0b]" />
-            <span className="text-sm font-semibold text-black dark:text-white font-inter">
-              {recipe.rating_avg.toFixed(1)}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Content */}
@@ -440,21 +431,33 @@ function RecipeCard({ recipe, totalTime, difficultyLabels, user, navigate }) {
         </div>
 
         {/* Difficulty Badge */}
-        {recipe.difficulty && (
-          <div className="inline-flex items-center gap-2">
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold font-inter ${
-                recipe.difficulty === 'facil'
-                  ? 'bg-[#dcfce7] text-[#16a34a]'
-                  : recipe.difficulty === 'media'
-                  ? 'bg-[#fef3c7] text-[#d97706]'
-                  : 'bg-[#fee2e2] text-[#dc2626]'
-              }`}
-            >
-              {difficultyLabels[recipe.difficulty] || recipe.difficulty}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center justify-between mt-2">
+          {recipe.difficulty ? (
+            <div className="inline-flex items-center gap-2">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold font-inter ${
+                  recipe.difficulty === 'facil'
+                    ? 'bg-[#dcfce7] text-[#16a34a]'
+                    : recipe.difficulty === 'media'
+                    ? 'bg-[#fef3c7] text-[#d97706]'
+                    : 'bg-[#fee2e2] text-[#dc2626]'
+                }`}
+              >
+                {difficultyLabels[recipe.difficulty] || recipe.difficulty}
+              </span>
+            </div>
+          ) : <div></div>}
+
+          {/* Rating Badge */}
+          {recipe.rating_avg !== null && recipe.rating_avg !== undefined && recipe.rating_avg > 0 && (
+            <div className="flex items-center gap-1 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-lg">
+              <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+              <span className="font-bold text-sm text-amber-700 dark:text-amber-400">
+                {Number(recipe.rating_avg).toFixed(1)}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
